@@ -63,8 +63,9 @@ export interface ErasureRecord {
   agentId: string;
   method: string;
   erasedAt: string;
+  rowsDeleted?: Record<string, number>;
 }
 
-export function erasureRecord(agentId: string, now = Date.now()): ErasureRecord {
-  return { agentId, method: ERASURE_METHOD, erasedAt: new Date(now).toISOString() };
+export function erasureRecord(agentId: string, rowsDeleted?: Record<string, number>, now = Date.now()): ErasureRecord {
+  return { agentId, method: ERASURE_METHOD, erasedAt: new Date(now).toISOString(), rowsDeleted };
 }

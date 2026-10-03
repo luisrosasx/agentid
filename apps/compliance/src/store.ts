@@ -5,6 +5,7 @@ export interface ErasureStore {
   insert(record: ErasureRecord): Promise<void>;
   listByAgent(agentId: string): Promise<ErasureRecord[]>;
   mode: 'postgres' | 'memory';
+  pool?: Pool;
 }
 
 class MemoryStore implements ErasureStore {
@@ -24,24 +25,29 @@ class MemoryStore implements ErasureStore {
 
 class PgStore implements ErasureStore {
   readonly mode = 'postgres' as const;
-  constructor(private pool: Pool) {}
+  pool?: Pool;
+
+  constructor(pool: Pool) {
+    this.pool = pool;
+  }
 
   async insert(record: ErasureRecord): Promise<void> {
-    await this.pool.query(
-      `INSERT INTO erasure_log (agent_id, method, erased_at) VALUES ($1,$2,$3)`,
-      [record.agentId, record.method, record.erasedAt],
+    await this.pool!.query(
+      `INSERT INTO erasure_log (agent_id, method, erased_at, rows_deleted) VALUES ($1,$2,$3,$4)`,
+      [record.agentId, record.method, record.erasedAt, JSON.stringify(record.rowsDeleted ?? {})],
     );
   }
 
   async listByAgent(agentId: string): Promise<ErasureRecord[]> {
-    const res = await this.pool.query(
-      `SELECT agent_id, method, erased_at FROM erasure_log WHERE agent_id = $1`,
+    const res = await this.pool!.query(
+      `SELECT agent_id, method, erased_at, rows_deleted FROM erasure_log WHERE agent_id = $1`,
       [agentId],
     );
     return res.rows.map((row) => ({
       agentId: row['agent_id'] as string,
       method: row['method'] as string,
       erasedAt: new Date(row['erased_at']).toISOString(),
+      rowsDeleted: row['rows_deleted'] == null ? undefined : (row['rows_deleted'] as Record<string, number>),
     }));
   }
 }
@@ -63,5 +69,7 @@ CREATE TABLE IF NOT EXISTS erasure_log (
   id BIGSERIAL PRIMARY KEY,
   agent_id TEXT NOT NULL,
   method TEXT NOT NULL,
-  erased_at TIMESTAMPTZ NOT NULL DEFAULT now()
-)`;
+  erased_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  rows_deleted JSONB
+);
+ALTER TABLE erasure_log ADD COLUMN IF NOT EXISTS rows_deleted JSONB`;

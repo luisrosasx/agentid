@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { Redis } from 'ioredis';
 import { TypedDataEncoder, verifyTypedData } from 'ethers';
+import { registerMetrics } from './metrics.js';
 
 const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const TYPES = {
@@ -88,7 +89,7 @@ export function verifyAttestation(entry: CachedAttestation): { valid: boolean; r
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
-const counters = { resolves: 0, valid: 0, invalid: 0, verifies: 0 };
+const counters = { resolves: 0, valid: 0, invalid: 0, verifies: 0, resolves_ok: 0 };
 
 app.get('/healthz', async () => ({ ok: true, service: 'resolver' }));
 
@@ -105,6 +106,7 @@ app.get<{ Params: { agentId: string } }>('/resolve/:agentId', async (req, reply)
     return reply.code(404).send({ valid: false, reason: result.reason });
   }
   counters.valid += 1;
+  counters.resolves_ok += 1;
   return {
     valid: true,
     attestation: entry.attestation,
@@ -127,13 +129,11 @@ app.post<{ Body: { attestation?: Record<string, unknown>; signature?: string; is
   return { valid: true, attestation, issuer };
 });
 
-app.get('/metrics', async () => ({
-  resolves: counters.resolves,
-  valid: counters.valid,
-  invalid: counters.invalid,
-  verifies: counters.verifies,
-  cache: process.env.REDIS_URL ? 'redis' : 'memory',
-}));
+registerMetrics(app, {
+  service: 'resolver',
+  business: counters,
+  extra: () => ({ cache: process.env.REDIS_URL ? 'redis' : 'memory' }),
+});
 
 export function seed(agentId: string, entry: CachedAttestation): void {
   memory.set(`att:${agentId}`, entry);

@@ -1,14 +1,18 @@
 import Fastify from 'fastify';
 import { loadFleet, renderHtml } from './portal.js';
+import { registerMetrics } from './metrics.js';
 
 const SERVICE = 'portal-b2b';
 
 async function main(): Promise<void> {
   const app = Fastify({ logger: true });
+  const counters = { fleet_queries: 0 };
+  registerMetrics(app, { service: SERVICE, business: counters });
 
   app.get('/healthz', async () => ({ ok: true, service: SERVICE }));
 
   app.get('/api/fleet', async () => {
+    counters.fleet_queries += 1;
     const identities = await loadFleet(process.env['POB_URL'], process.env['RESOLVER_URL']);
     return { identities };
   });

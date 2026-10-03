@@ -56,8 +56,9 @@ test('policy rejects op exceeding daily limit', () => {
 
 test('policy accumulates spentTodayWei against the limit', () => {
   const op = makeOp();
-  const maxSpend = (BigInt(op.callGasLimit) + BigInt(op.verificationGasLimit)) * BigInt(op.maxFeePerGas);
-  const result = validatePolicy(policy(), op, { spentTodayWei: '0x' + maxSpend.toString(16) });
+  // spentToday ya consumio todo el limite diario: cualquier op nueva lo excede
+  const spentAll = BigInt('0x8ac7230489e80000').toString(16);
+  const result = validatePolicy(policy(), op, { spentTodayWei: '0x' + spentAll });
   assert.equal(result.ok, false);
   assert.ok(result.violations.includes('DAILY_LIMIT_EXCEEDED'));
 });

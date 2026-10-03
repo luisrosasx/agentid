@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { createHash, randomBytes } from 'node:crypto';
 import { Pool } from 'pg';
+import { registerMetrics } from './metrics.js';
 
 const CHALLENGE_TTL_SECONDS = 300;
 
@@ -107,6 +108,9 @@ function newChallenge(agentId: string): Challenge {
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
+const counters = { challenges_issued: 0 };
+registerMetrics(app, { service: 'challenges', business: counters });
+
 app.get('/healthz', async () => ({ ok: true, service: 'challenges' }));
 
 app.post<{ Body: { agentId?: string } }>('/challenge', async (req, reply) => {
@@ -116,6 +120,7 @@ app.post<{ Body: { agentId?: string } }>('/challenge', async (req, reply) => {
   }
   const challenge = newChallenge(agentId);
   await saveChallenge(challenge);
+  counters.challenges_issued += 1;
   return reply.code(201).send({
     id: challenge.id,
     agentId: challenge.agentId,

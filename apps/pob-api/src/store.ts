@@ -4,6 +4,7 @@ import type { StoredReceipt } from './receipts.js';
 export interface ReceiptStore {
   insert(receipt: StoredReceipt): Promise<void>;
   listByAgent(agentId: string): Promise<StoredReceipt[]>;
+  listAll(): Promise<StoredReceipt[]>;
   mode: 'postgres' | 'memory';
 }
 
@@ -23,6 +24,12 @@ class MemoryStore implements ReceiptStore {
 
   async listByAgent(agentId: string): Promise<StoredReceipt[]> {
     return [...(this.byAgent.get(agentId) ?? [])];
+  }
+
+  async listAll(): Promise<StoredReceipt[]> {
+    const all: StoredReceipt[] = [];
+    for (const list of this.byAgent.values()) all.push(...list);
+    return all;
   }
 }
 
@@ -52,6 +59,21 @@ class PgStore implements ReceiptStore {
       `SELECT agent_id, counterparty, outcome, nonce, issued_at, signer, received_at
        FROM receipts WHERE agent_id = $1`,
       [agentId],
+    );
+    return res.rows.map((row) => ({
+      agentId: row['agent_id'] as string,
+      counterparty: row['counterparty'] as string,
+      outcome: row['outcome'] as string,
+      nonce: row['nonce'] as string,
+      issuedAt: new Date(row['issued_at']).toISOString(),
+      signer: row['signer'] as string,
+      receivedAt: new Date(row['received_at']).toISOString(),
+    }));
+  }
+
+  async listAll(): Promise<StoredReceipt[]> {
+    const res = await this.pool.query(
+      `SELECT agent_id, counterparty, outcome, nonce, issued_at, signer, received_at FROM receipts`,
     );
     return res.rows.map((row) => ({
       agentId: row['agent_id'] as string,

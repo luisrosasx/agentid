@@ -55,20 +55,12 @@ export interface AttestationMessage {
 
 export function getReceiptTypes(): Eip712Types {
   return {
-    EIP712Domain: [
-      { name: 'name', type: 'string' },
-      { name: 'version', type: 'string' },
-    ],
     ...BilateralReceiptStruct,
   };
 }
 
 export function getAttestationTypes(): Eip712Types {
   return {
-    EIP712Domain: [
-      { name: 'name', type: 'string' },
-      { name: 'version', type: 'string' },
-    ],
     ...AttestationStruct,
   };
 }

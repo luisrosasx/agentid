@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { keccak256, toUtf8Bytes, concat } from 'ethers';
 import { Pool } from 'pg';
+import { registerMetrics } from './metrics.js';
 
 const MAX_BATCH = 1000;
 const ANCHOR_MODE = process.env.ANCHOR_MODE ?? 'sim';
@@ -64,6 +65,9 @@ async function ensureTable(): Promise<void> {
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
+const counters = { anchors: 0 };
+registerMetrics(app, { service: 'anchor', business: counters });
+
 app.get('/healthz', async () => ({ ok: true, service: 'anchor' }));
 
 app.post<{ Body: { attestations?: unknown[] } }>('/anchor', async (req, reply) => {
@@ -82,6 +86,7 @@ app.post<{ Body: { attestations?: unknown[] } }>('/anchor', async (req, reply) =
       ? keccak256(toUtf8Bytes(`agentid:sim:${root}:${attestations.length}:${anchoredAt.getTime()}`))
       : '';
   await saveAnchor({ root, leafCount: attestations.length, anchoredAt, mode: ANCHOR_MODE, txHash });
+  counters.anchors += 1;
   return reply.code(201).send({ root, leafCount: attestations.length, anchoredAt: anchoredAt.toISOString(), mode: ANCHOR_MODE, txHash });
 });
 

@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { Wallet, TypedDataEncoder } from 'ethers';
 import { Pool } from 'pg';
+import { registerMetrics } from './metrics.js';
 
 const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const TYPES = {
@@ -109,6 +110,9 @@ async function ensureTable(): Promise<void> {
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
+const counters = { attestations_issued: 0 };
+registerMetrics(app, { service: 'issuer', business: counters });
+
 app.get('/healthz', async () => ({ ok: true, service: 'issuer' }));
 
 app.post<{
@@ -150,6 +154,7 @@ app.post<{
     signature,
     issuer: issuer.address,
   });
+  counters.attestations_issued += 1;
   return reply.code(201).send({ attestation, signature, issuer: issuer.address, digest });
 });
 

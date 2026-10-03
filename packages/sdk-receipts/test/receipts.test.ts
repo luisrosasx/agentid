@@ -38,10 +38,10 @@ test('verify fails for a different expected signer', async () => {
   assert.equal(verifyReceipt(signed, other.address), false);
 });
 
-test('verify fails on tampered message', async () => {
+test('tampered message fails verification', async () => {
   const signed = await signReceipt(receipt(), wallet);
   const tampered = { ...signed, message: { ...signed.message, outcome: 2 } };
-  assert.throws(() => verifyReceipt(tampered));
+  assert.equal(verifyReceipt(tampered), false);
 });
 
 test('receipt digest is deterministic per message', () => {

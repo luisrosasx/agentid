@@ -1,11 +1,14 @@
 import Fastify from 'fastify';
 import { computePolicy, fetchScore } from './policy.js';
 import { CREDIT_DECISIONS_TABLE_DDL, openDecisionStore, type DecisionStore } from './store.js';
+import { registerMetrics } from './metrics.js';
 
 const SERVICE = 'credit';
 
 async function main(): Promise<void> {
   const app = Fastify({ logger: true });
+  const counters = { scores: 0 };
+  registerMetrics(app, { service: SERVICE, business: counters });
   const store: DecisionStore = await openDecisionStore();
 
   if (store.mode === 'postgres') {
@@ -20,6 +23,7 @@ async function main(): Promise<void> {
   app.get<{ Params: { agentId: string } }>('/account/:agentId', async (req) => {
     const { agentId } = req.params;
     const { score, source } = await fetchScore(process.env['POB_URL'], agentId);
+    counters.scores += 1;
     return computePolicy(agentId, score, source);
   });
 

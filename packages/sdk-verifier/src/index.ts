@@ -1,4 +1,4 @@
-import { recoverAddress, verifyTypedData, getAddress, isAddress } from 'ethers';
+import { verifyTypedData, getAddress, isAddress } from 'ethers';
 
 import {
   AGENT_ID_DOMAIN,
@@ -66,26 +66,14 @@ export function verifyAttestation(
   }
 
   const issuer = getAddress(issuerAddress);
-  const recovered = recoverAddress(
+  const recovered = verifyTypedData(
     { name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version },
     getAttestationTypes(),
     { ...att },
     signature,
   );
-
   if (recovered.toLowerCase() !== issuer.toLowerCase()) {
     throw new AttestationFormatError('signature does not match issuerAddress');
-  }
-
-  const ok = verifyTypedData(
-    { name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version },
-    getAttestationTypes(),
-    { ...att },
-    signature,
-  );
-
-  if (ok.toLowerCase() !== issuer.toLowerCase()) {
-    throw new AttestationFormatError('signature verification failed');
   }
 
   return { signer: recovered, attestation: { ...att } };
