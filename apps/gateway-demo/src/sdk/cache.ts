@@ -1,4 +1,4 @@
-import { AttestationMessage, validateAttestationValidity } from './schemas.js';
+import { validateAttestationValidity, MAX_ATTESTATION_VALIDITY_SECONDS, type AttestationMessage } from './schemas.js';
 
 export interface CacheEntry {
   attestation: AttestationMessage;
@@ -68,14 +68,16 @@ export class AttestationCache {
     return entry;
   }
 
-  /** Hard check: is the attestation inside its cryptographic validity window? */
+  /** Hard check: is the attestation inside its cryptographic validity window?
+   *  Acepta la forma cruda del issuer (epoch ms como numbers) o la normalizada (bigint seconds). */
   isValid(entry: CacheEntry, now: bigint = BigInt(Math.floor(Date.now() / 1000))): boolean {
-    try {
-      validateAttestationValidity(entry.attestation, now);
-      return true;
-    } catch {
-      return false;
-    }
+    const a = entry.attestation as unknown as Record<string, unknown>;
+    const i = typeof a['issuedAt'] === 'bigint' ? (a['issuedAt'] as bigint) : toSeconds(a['issuedAt']);
+    const e = typeof a['expiresAt'] === 'bigint' ? (a['expiresAt'] as bigint) : toSeconds(a['expiresAt']);
+    if (e <= i) return false;
+    if (e - i > BigInt(MAX_ATTESTATION_VALIDITY_SECONDS)) return false;
+    if (e <= now) return false;
+    return true;
   }
 
   stats(): CacheStats {

@@ -1,4 +1,5 @@
-import { verifyAttestation, AttestationFormatError } from './verifier.js';
+import { verifyTypedData } from 'ethers';
+import { DOMAIN, ATTESTATION_TYPES } from './verifier.js';
 import { AttestationValidityError, type AttestationMessage } from './schemas.js';
 
 import { AttestationCache, type CacheEntry } from './cache.js';
@@ -108,18 +109,22 @@ export class GatewayEnforcer {
     if (!this.cache.isValid(entry, BigInt(Math.floor(nowMs / 1000)))) {
       return this.deny(agentId, 'ATTESTATION_EXPIRED', false);
     }
+    // La firma del issuer fue hecha sobre el mensaje crudo (issuedAt/expiresAt en
+    // milisegundos como numbers, con challengeId). Verificar contra el raw, nunca
+    // contra la forma normalizada del cache.
     try {
-      const verified = verifyAttestation(
-        entry.attestation,
-        entry.issuer,
-        entry.signature,
-        BigInt(Math.floor(nowMs / 1000)),
-      );
-      entry.attestation = verified.attestation as AttestationMessage;
+      const a = rawEntry.attestation as Record<string, unknown>;
+      const recovered = verifyTypedData(DOMAIN, ATTESTATION_TYPES, a as never, rawEntry.signature);
+      if (recovered.toLowerCase() !== rawEntry.issuer.toLowerCase()) {
+        throw new Error('issuer mismatch');
+      }
+      if (Number(a['expiresAt']) <= nowMs) {
+        return this.deny(agentId, 'ATTESTATION_EXPIRED', false);
+      }
     } catch (err) {
-      void err; // bad signature/format → fail-closed, degraded
       return this.deny(agentId, 'NO_ATTESTATION', true, 'resolver_unreachable');
     }
+    entry.attestation = rawEntry.attestation as never;
     this.cache.set(agentId, entry);
 
     let policy = this.creditPolicies.get(agentId);

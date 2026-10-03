@@ -35,18 +35,20 @@ async function makeResolverBody(nowSec: number, ttlSec: number) {
     agentId: AGENT,
     certType: 'AGENT.CERT',
     capabilitiesHash: '0x' + 'a'.repeat(64),
-    issuedAt: nowSec,
-    expiresAt: nowSec + ttlSec,
+    challengeId: 'challenge-1',
+    issuedAt: nowSec * 1000,
+    expiresAt: (nowSec + ttlSec) * 1000,
   };
   const signature = await issuer.signTypedData(
-    { name: 'AGENT.ID', version: '1' },
+    { name: 'AGENT.ID', version: '1', chainId: 31337 },
     {
       Attestation: [
         { name: 'agentId', type: 'string' },
         { name: 'certType', type: 'string' },
         { name: 'capabilitiesHash', type: 'bytes32' },
-        { name: 'issuedAt', type: 'uint256' },
-        { name: 'expiresAt', type: 'uint256' },
+        { name: 'challengeId', type: 'string' },
+        { name: 'issuedAt', type: 'uint64' },
+        { name: 'expiresAt', type: 'uint64' },
       ],
     },
     attestation as never,
