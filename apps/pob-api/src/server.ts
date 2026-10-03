@@ -28,7 +28,8 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
   const counters = { receipts: 0, scores: 0, crossAttests: 0, settles: 0, slashes: 0 };
 
   const app = Fastify({ logger: false, trustProxy: true });
-  registerMetrics(app, { service: SERVICE, business: counters });
+  const signerAddress = new (await import('ethers')).Wallet(process.env['POB_KEY'] ?? ephemeralKey()).address;
+  registerMetrics(app, { service: SERVICE, business: counters, extra: () => ({ lastReceiptSigner: signerAddress, ephemeral: process.env['POB_KEY'] === undefined }) });
   await applyRateLimit(app);
   applyServiceAuth(app);
 
