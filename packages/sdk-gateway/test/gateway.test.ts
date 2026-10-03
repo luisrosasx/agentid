@@ -50,29 +50,29 @@ let nonceCounter = 0;
 
 async function makeResolverBody(nowSec: number, ttlSec: number, wallet = issuer): Promise<{ entry: RawEntry; expiresSec: number }> {
   nonceCounter += 1;
-  const issuedAt = nowSec;
-  const expiresAt = nowSec + ttlSec;
   const attestation = {
     agentId: AGENT,
     certType: 'AGENT.CERT',
     capabilitiesHash: '0x' + 'a'.repeat(64),
-    issuedAt,
-    expiresAt,
+    challengeId: `challenge-${nonceCounter}`,
+    issuedAt: nowSec * 1000,
+    expiresAt: (nowSec + ttlSec) * 1000,
   };
   const signature = await wallet.signTypedData(
-    { name: 'AGENT.ID', version: '1' },
+    { name: 'AGENT.ID', version: '1', chainId: 31337 },
     {
       Attestation: [
         { name: 'agentId', type: 'string' },
         { name: 'certType', type: 'string' },
         { name: 'capabilitiesHash', type: 'bytes32' },
-        { name: 'issuedAt', type: 'uint256' },
-        { name: 'expiresAt', type: 'uint256' },
+        { name: 'challengeId', type: 'string' },
+        { name: 'issuedAt', type: 'uint64' },
+        { name: 'expiresAt', type: 'uint64' },
       ],
     },
     attestation as never,
   );
-  return { entry: { attestation, signature, issuer: wallet.address }, expiresSec: expiresAt };
+  return { entry: { attestation, signature, issuer: wallet.address }, expiresSec: nowSec + ttlSec };
 }
 
 function makeEnforcer(
@@ -304,8 +304,7 @@ test('clients: ResolverClient and CreditClient return null on failures', async (
   assert.equal(await credit.getPolicy(AGENT), null);
 });
 
-test('cache: invalid raw payload rejected, fresh entry returned while TTL valid', async () => {
-  const raw = { attestation: { agentId: AGENT, certType: 'AGENT.CERT', capabilitiesHash: '0x' + 'a'.repeat(64), issuedAt: 1700000000, expiresAt: 1700003600 }, signature: '0x00', issuer: issuer.address };
+test('cache: invalid raw payload rejected, fresh entry returned while TTL valid', async () => {  const raw = { attestation: { agentId: AGENT, certType: 'AGENT.CERT', capabilitiesHash: '0x' + 'a'.repeat(64), issuedAt: 1700000000, expiresAt: 1700003600 }, signature: '0x00', issuer: issuer.address };
   const entry = AttestationCache.fromRaw(raw);
   assert.equal(entry.attestation.expiresAt, 1700003600n);
   const cache = new AttestationCache(60_000);
@@ -317,4 +316,31 @@ test('cache: invalid raw payload rejected, fresh entry returned while TTL valid'
   const st = cache.stats();
   assert.equal(st.size, 1);
   assert.ok(st.hits >= 1 && st.misses >= 1);
+});
+
+test('cache: isValid tolerates raw epoch-ms numbers (issuer form) and bigint seconds', () => {
+  const nowSec = BigInt(Math.floor(Date.now() / 1000));
+  const cache = new AttestationCache(60_000);
+  const msEntry: CacheEntry = {
+    attestation: { agentId: AGENT, certType: 'AGENT.CERT', capabilitiesHash: '0x' + 'b'.repeat(64), issuedAt: Date.now() - 60_000, expiresAt: Date.now() + 3_600_000 } as never,
+    signature: '0x00',
+    issuer: issuer.address,
+    fetchedAtMs: Date.now(),
+  };
+  assert.equal(cache.isValid(msEntry, nowSec), true);
+  const expiredMsEntry: CacheEntry = {
+    attestation: { agentId: AGENT, certType: 'AGENT.CERT', capabilitiesHash: '0x' + 'b'.repeat(64), issuedAt: Date.now() - 7_200_000, expiresAt: Date.now() - 3_600_000 } as never,
+    signature: '0x00',
+    issuer: issuer.address,
+    fetchedAtMs: Date.now(),
+  };
+  assert.equal(cache.isValid(expiredMsEntry, nowSec), false);
+  const secEntry: CacheEntry = {
+    attestation: { agentId: AGENT, certType: 'AGENT.CERT', capabilitiesHash: '0x' + 'b'.repeat(64), issuedAt: nowSec, expiresAt: nowSec + 3600n },
+    signature: '0x00',
+    issuer: issuer.address,
+    fetchedAtMs: Date.now(),
+  };
+  assert.equal(cache.isValid(secEntry, nowSec), true);
+  assert.equal(cache.isValid(secEntry, nowSec + 3601n), false);
 });
