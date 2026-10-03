@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { Redis } from 'ioredis';
 import { TypedDataEncoder, verifyTypedData } from 'ethers';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const TYPES = {
@@ -88,6 +89,15 @@ export function verifyAttestation(entry: CachedAttestation): { valid: boolean; r
 }
 
 const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+
+// Store de rate limit: Redis si hay REDIS_URL; in-memory si no.
+const rateLimitRedis = process.env.REDIS_URL
+  ? new Redis(process.env.REDIS_URL)
+  : undefined;
+
+await applyRateLimit(app, { redis: rateLimitRedis });
+// /verify y las lecturas de negocio (/resolve) son públicas por diseño.
+applyServiceAuth(app, { extraPublicRoutes: ['/verify'], publicRoutePrefixes: ['/resolve'] });
 
 const counters = { resolves: 0, valid: 0, invalid: 0, verifies: 0, resolves_ok: 0 };
 

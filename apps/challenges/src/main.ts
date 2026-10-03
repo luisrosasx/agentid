@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { createHash, randomBytes } from 'node:crypto';
 import { Pool } from 'pg';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 const CHALLENGE_TTL_SECONDS = 300;
 
@@ -110,6 +111,9 @@ const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
 const counters = { challenges_issued: 0 };
 registerMetrics(app, { service: 'challenges', business: counters });
+
+await applyRateLimit(app);
+applyServiceAuth(app);
 
 app.get('/healthz', async () => ({ ok: true, service: 'challenges' }));
 

@@ -17,6 +17,12 @@ importers:
 
   apps/anchor:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -45,6 +51,12 @@ importers:
 
   apps/challenges:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       fastify:
         specifier: ^4.28.1
         version: 4.29.1
@@ -70,6 +82,12 @@ importers:
 
   apps/compliance:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -98,6 +116,12 @@ importers:
 
   apps/credit:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -126,6 +150,12 @@ importers:
 
   apps/gateway-demo:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -148,6 +178,12 @@ importers:
 
   apps/issuer:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -176,6 +212,12 @@ importers:
 
   apps/pob-api:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -204,6 +246,15 @@ importers:
 
   apps/portal-b2b:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/formbody':
+        specifier: ^7.4.0
+        version: 7.4.0
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       fastify:
         specifier: ^4.28.1
         version: 4.29.1
@@ -223,6 +274,12 @@ importers:
 
   apps/resolver:
     dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^9.1.0
+        version: 9.1.0
       ethers:
         specifier: ^6.13.4
         version: 6.17.0
@@ -278,6 +335,25 @@ importers:
       ethers:
         specifier: ^6.13.0
         version: 6.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.1
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
+  packages/sdk-auth:
+    dependencies:
+      ethers:
+        specifier: ^6.13.0
+        version: 6.17.0
+      fastify:
+        specifier: ^4.28.1
+        version: 4.29.1
     devDependencies:
       '@types/node':
         specifier: ^24.0.0
@@ -638,8 +714,14 @@ packages:
   '@fastify/fast-json-stringify-compiler@4.3.0':
     resolution: {integrity: sha512-aZAXGYo6m22Fk1zZzEUKBvut/CIIQe/BapEORnxiD5Qr0kPHqqI69NtEMCme74h+at72sPhbkb4ZrLd1W3KRLA==}
 
+  '@fastify/formbody@7.4.0':
+    resolution: {integrity: sha512-H3C6h1GN56/SMrZS8N2vCT2cZr7mIHzBHzOBa5OPpjfB/D6FzP9mMpE02ZzrFX0ANeh0BAJdoXKOF2e7IbV+Og==}
+
   '@fastify/merge-json-schemas@0.1.1':
     resolution: {integrity: sha512-fERDVz7topgNjtXsJTTW1JKLy0rhuLRcquYqNR9rF7OcVpCa2OVW49ZPDIhaRRCaUuvVxI+N416xUoF76HNSXA==}
+
+  '@fastify/rate-limit@9.1.0':
+    resolution: {integrity: sha512-h5dZWCkuZXN0PxwqaFQLxeln8/LNwQwH9popywmDCFdKfgpi4b/HoMH1lluy6P+30CG9yzzpSpwTCIPNB9T1JA==}
 
   '@ioredis/commands@1.10.0':
     resolution: {integrity: sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q==}
@@ -657,6 +739,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@lukeed/ms@2.0.2':
+    resolution: {integrity: sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA==}
+    engines: {node: '>=8'}
 
   '@noble/curves@1.2.0':
     resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
@@ -1573,6 +1659,9 @@ packages:
 
   fast-uri@3.1.8:
     resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
+
+  fastify-plugin@4.5.1:
+    resolution: {integrity: sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==}
 
   fastify@4.29.1:
     resolution: {integrity: sha512-m2kMNHIG92tSNWv+Z3UeTR9AWLLuo7KctC7mlFPtMEVrfjIhmQhkQnT9v15qA/BfVq3vvj134Y0jl9SBje3jXQ==}
@@ -3343,9 +3432,20 @@ snapshots:
     dependencies:
       fast-json-stringify: 5.16.1
 
+  '@fastify/formbody@7.4.0':
+    dependencies:
+      fast-querystring: 1.1.2
+      fastify-plugin: 4.5.1
+
   '@fastify/merge-json-schemas@0.1.1':
     dependencies:
       fast-deep-equal: 3.1.3
+
+  '@fastify/rate-limit@9.1.0':
+    dependencies:
+      '@lukeed/ms': 2.0.2
+      fastify-plugin: 4.5.1
+      toad-cache: 3.7.4
 
   '@ioredis/commands@1.10.0': {}
 
@@ -3366,6 +3466,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@lukeed/ms@2.0.2': {}
 
   '@noble/curves@1.2.0':
     dependencies:
@@ -4427,6 +4529,8 @@ snapshots:
   fast-uri@2.4.7: {}
 
   fast-uri@3.1.8: {}
+
+  fastify-plugin@4.5.1: {}
 
   fastify@4.29.1:
     dependencies:

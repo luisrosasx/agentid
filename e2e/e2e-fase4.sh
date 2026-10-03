@@ -113,10 +113,10 @@ fi
 
 # --- Paso 5: recibo bilateral firmado (pob-api, POB_KEY) ------------------------
 step 5 "Recibo bilateral firmado — pob-api /receipt (firma con POB_KEY)"
-if [[ -n "${POB_KEY:-}" ]]; then
+if [[ -n "${E2E_SIGNER_KEY:-${POB_KEY:-}}" ]]; then
   RECEIPT_SIG="$(cd "$AGENTID/apps/pob-api" && node --input-type=module -e "
     const { ethers } = await import('ethers');
-    const wallet = new ethers.Wallet(process.env.POB_KEY);
+    const wallet = new ethers.Wallet(process.env.E2E_SIGNER_KEY ?? process.env.POB_KEY);
     const domain = { name: 'AGENT.ID Proof-of-Behavior', version: '1' };
     const types = { Receipt: [
       { name: 'agentId', type: 'string' },

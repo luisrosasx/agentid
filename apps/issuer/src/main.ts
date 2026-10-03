@@ -1,7 +1,9 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import { Wallet, TypedDataEncoder } from 'ethers';
 import { Pool } from 'pg';
+import { InMemoryNonceStore, requireHmac } from '@agentid/sdk-auth';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const TYPES = {
@@ -108,16 +110,43 @@ async function ensureTable(): Promise<void> {
   `);
 }
 
-const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+const app: FastifyInstance = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
 const counters = { attestations_issued: 0 };
 registerMetrics(app, { service: 'issuer', business: counters });
+
+await applyRateLimit(app);
+applyServiceAuth(app);
+
+function hmacSecrets(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const pair of (process.env['HMAC_SECRETS'] ?? '').split(',')) {
+    const idx = pair.indexOf(':');
+    if (idx > 0) out[pair.slice(0, idx).trim()] = pair.slice(idx + 1).trim();
+  }
+  return out;
+}
+
+// Captura rawBody para que el HMAC de requireHmac cuadre byte a byte.
+app.addHook('preParsing', (req, _reply, payload, done) => {
+  const chunks: Buffer[] = [];
+  payload.on('data', (chunk: Buffer | string) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+  payload.on('end', () => {
+    (req as unknown as { rawBody?: Buffer }).rawBody = Buffer.concat(chunks);
+  });
+  done(null, payload);
+});
+
+// Fase 6 (B1): con AUTH_MODE≠off, POST /attestation exige además HMAC de
+// servicio (secrets en HMAC_SECRETS, formato serviceId:secret,...) sobre el
+// rawBody; con AUTH_MODE=off el guard es no-op y el flujo no cambia.
+const hmacGuard = requireHmac({ secrets: hmacSecrets() });
 
 app.get('/healthz', async () => ({ ok: true, service: 'issuer' }));
 
 app.post<{
   Body: { agentId?: string; certType?: string; capabilitiesHash?: string; challengeId?: string };
-}>('/attestation', async (req, reply) => {
+}>('/attestation', { preHandler: [hmacGuard] }, async (req, reply) => {
   const { agentId, certType, capabilitiesHash, challengeId } = req.body ?? {};
   if (typeof agentId !== 'string' || agentId.length === 0 ||
       typeof certType !== 'string' || certType.length === 0 ||

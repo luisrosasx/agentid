@@ -6,6 +6,7 @@ import { batchRootForDay, splitInterchange, type SettlementRecord } from './sett
 import { openReceiptStore, RECEIPTS_TABLE_DDL, type ReceiptStore } from './store.js';
 import { openRecordsStore, RECORDS_TABLE_DDL, type RecordsStore } from './records.js';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 const SERVICE = 'pob-api';
 
@@ -28,6 +29,8 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
 
   const app = Fastify({ logger: false });
   registerMetrics(app, { service: SERVICE, business: counters });
+  await applyRateLimit(app);
+  applyServiceAuth(app);
 
   app.get('/healthz', async () => ({ ok: true, service: SERVICE, store: receipts.mode }));
 

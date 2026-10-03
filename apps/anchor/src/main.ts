@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { keccak256, toUtf8Bytes, concat } from 'ethers';
 import { Pool } from 'pg';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 import { anchorOnChain, resolveOnchainConfig } from './onchain.js';
 
 const MAX_BATCH = 1000;
@@ -72,6 +73,9 @@ const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
 
 const counters = { anchors: 0 };
 registerMetrics(app, { service: 'anchor', business: counters });
+
+await applyRateLimit(app);
+applyServiceAuth(app);
 
 app.get('/healthz', async () => ({ ok: true, service: 'anchor' }));
 

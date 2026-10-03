@@ -8,6 +8,8 @@
     "start": "tsx src/main.ts"
   },
   "dependencies": {
+    "@agentid/sdk-auth": "workspace:*",
+    "@fastify/rate-limit": "^9.1.0",
     "fastify": "^4.28.1",
     "pg": "^8.13.1",
     "tsx": "^4.19.2"

@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import { computePolicy, fetchScore } from './policy.js';
 import { CREDIT_DECISIONS_TABLE_DDL, openDecisionStore, type DecisionStore } from './store.js';
 import { registerMetrics } from './metrics.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 const SERVICE = 'credit';
 
@@ -9,6 +10,9 @@ async function main(): Promise<void> {
   const app = Fastify({ logger: true });
   const counters = { scores: 0 };
   registerMetrics(app, { service: SERVICE, business: counters });
+
+  await applyRateLimit(app);
+  applyServiceAuth(app);
   const store: DecisionStore = await openDecisionStore();
 
   if (store.mode === 'postgres') {

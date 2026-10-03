@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { GatewayEnforcer, percentile } from './sdk/index.js';
+import { applyRateLimit, applyServiceAuth } from './auth.js';
 
 /**
  * Gateway demo (EP: enforcement gateway, blueprint 02 §2 paso 7).
@@ -15,9 +16,13 @@ function allowedTargetsFromEnv(): Record<string, string[]> | undefined {
   return JSON.parse(raw) as Record<string, string[]>;
 }
 
-export function createApp(enforcer?: GatewayEnforcer): FastifyInstance {
+export async function createApp(enforcer?: GatewayEnforcer): Promise<FastifyInstance> {
   const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
   const client = enforcer ?? new GatewayEnforcer({ allowedTargetsByAgent: allowedTargetsFromEnv() });
+
+  // El gateway tiene su propia lógica de enforcement (/enforce queda público).
+  await applyRateLimit(app);
+  applyServiceAuth(app, { extraPublicRoutes: ['/enforce'] });
 
   app.get('/healthz', async () => ({ status: 'ok' }));
 
@@ -62,7 +67,7 @@ export function createApp(enforcer?: GatewayEnforcer): FastifyInstance {
   return app;
 }
 
-const app = createApp();
+const app = await createApp();
 
 const start = async (): Promise<void> => {
   try {

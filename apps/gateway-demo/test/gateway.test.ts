@@ -67,7 +67,7 @@ async function makeApp(
     creditTtlMs: 60_000,
     ...extra,
   });
-  const app = createApp(enforcer);
+  const app = await createApp(enforcer);
   return { app, enforcer };
 }
 

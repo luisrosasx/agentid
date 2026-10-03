@@ -9,12 +9,15 @@
     "start": "tsx src/server.ts"
   },
   "dependencies": {
+    "@agentid/sdk-auth": "workspace:*",
+    "@fastify/formbody": "^7.4.0",
+    "@fastify/rate-limit": "^9.1.0",
     "fastify": "^4.28.1",
     "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
-    "typescript": "^5.6.0",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "typescript": "^5.6.0"
   }
 }
