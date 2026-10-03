@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Wallet } from 'ethers';
 import { createApp } from '../src/main.ts';
-import { GatewayEnforcer } from '@agentid/sdk-gateway';
-import type { EnforcerOptions } from '@agentid/sdk-gateway';
+import { GatewayEnforcer } from '../src/sdk/index.js';
+import type { EnforcerOptions } from '../src/sdk/index.js';
 
 const issuer = Wallet.createRandom();
 const TARGET = '0x' + '1'.repeat(40);

@@ -1,5 +1,5 @@
 import Fastify, { type FastifyInstance } from 'fastify';
-import { GatewayEnforcer, percentile } from '@agentid/sdk-gateway';
+import { GatewayEnforcer, percentile } from './sdk/index.js';
 
 /**
  * Gateway demo (EP: enforcement gateway, blueprint 02 §2 paso 7).

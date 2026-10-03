@@ -126,9 +126,9 @@ importers:
 
   apps/gateway-demo:
     dependencies:
-      '@agentid/sdk-gateway':
-        specifier: workspace:*
-        version: link:../../packages/sdk-gateway
+      ethers:
+        specifier: ^6.13.4
+        version: 6.17.0
       fastify:
         specifier: ^4.28.1
         version: 4.29.1
@@ -142,9 +142,6 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
-      ethers:
-        specifier: ^6.13.4
-        version: 6.17.0
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
