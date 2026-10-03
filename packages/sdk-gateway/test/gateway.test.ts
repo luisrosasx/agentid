@@ -161,14 +161,13 @@ test('deny: target not in allowed-targets policy', async () => {
   assert.equal(d.degraded, false);
 });
 
-test('deny: no target policy for agent (fail-closed by default)', async () => {
+test('sin allowlist configurada → el target es libre (política opcional del underwriter)', async () => {
   const { entry } = await makeResolverBody(Math.floor(Date.now() / 1000), 3600);
   const stub = stubFetch(() => ({ valid: true, ...entry }), creditOk);
   const enforcer = new GatewayEnforcer({ fetchFn: stub.fetchFn });
   await enforcer.enforce(AGENT, TARGET, 10n);
   const d = await enforcer.enforce(AGENT, TARGET, 10n);
-  assert.equal(d.outcome, 'deny');
-  assert.equal(d.reason, 'TARGET_NOT_ALLOWED');
+  assert.equal(d.outcome, 'allow');
 });
 
 test('deny: daily limit exceeded accumulates spentToday', async () => {

@@ -58,7 +58,10 @@ export class GatewayEnforcer {
         return this.deny(agentId, 'ATTESTATION_EXPIRED', false);
       }
       const allowed = this.allowedTargetsByAgent[agentId];
-      if (!Array.isArray(allowed) || !allowed.some((t) => t.toLowerCase() === target.toLowerCase())) {
+      // Sin allowlist configurada para el agente → cualquier target es válido
+      // (fail-closed se aplica a identidad, vigencia y crédito; el target es
+      // política opcional del underwriter). Con allowlist → se obliga.
+      if (Array.isArray(allowed) && !allowed.some((t) => t.toLowerCase() === target.toLowerCase())) {
         return this.deny(agentId, 'TARGET_NOT_ALLOWED', false);
       }
       const policy = this.creditPolicies.get(agentId);
