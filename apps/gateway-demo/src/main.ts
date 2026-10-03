@@ -21,23 +21,6 @@ export function createApp(enforcer?: GatewayEnforcer): FastifyInstance {
 
   app.get('/healthz', async () => ({ status: 'ok' }));
 
-  app.get('/debug-fetch', async () => {
-    const urls = [
-      ['resolver', `${process.env.RESOLVER_URL ?? '(unset)'}/healthz`],
-      ['credit', `${process.env.CREDIT_URL ?? '(unset)'}/healthz`],
-    ];
-    const out: Record<string, unknown> = {};
-    for (const [name, url] of urls) {
-      try {
-        const r = await fetch(url, { signal: AbortSignal.timeout(3000) });
-        out[name] = { ok: r.status, body: await r.text() };
-      } catch (e) {
-        out[name] = { error: String(e) };
-      }
-    }
-    return out;
-  });
-
   app.post<{ Body: { agentId?: unknown; target?: unknown; amountWei?: unknown } }>(
     '/enforce',
     async (req, reply) => {
