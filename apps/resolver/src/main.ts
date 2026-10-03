@@ -126,6 +126,12 @@ app.post<{ Body: { attestation?: Record<string, unknown>; signature?: string; is
   if (!result.valid) {
     return reply.code(404).send({ valid: false, reason: result.reason });
   }
+  counters.resolves_ok += 1;
+  await cache.set(`att:${String((attestation as Record<string, unknown>)['agentId'] ?? '')}`, {
+    attestation: attestation as Record<string, unknown>,
+    signature,
+    issuer,
+  });
   return { valid: true, attestation, issuer };
 });
 
