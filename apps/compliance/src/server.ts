@@ -49,7 +49,7 @@ function operatorAddresses(): string[] {
  * conserva body.operatorAddress como flujo actual.
  */
 export async function buildApp(): Promise<FastifyInstance> {
-  const app = Fastify({ logger: true });
+  const app = Fastify({ logger: true, trustProxy: true });
   const store = await openErasureStore();
   const memoryTables: MemoryTables = new Map();
   const counters = { kyc_issued: 0 };

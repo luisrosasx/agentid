@@ -20,8 +20,15 @@
 # (credit), la Railway del gateway debe tener DAILY_QUOTA_WEI y
 # PER_CALL_MAX_WEI >= dailyLimitWei de credit para el agente del test.
 #
-# Uso: GATEWAY=https://... CH=... IS=... RE=... CO=... PO=... CR=... POB_KEY=0x... \
+# Uso: GATEWAY=https://... CH=... IS=... RE=... CO=... PO=... CR=... \
+#        E2E_SERVICE_KEY=... E2E_HMAC_SECRET=... E2E_OPERATOR_KEY=0x... POB_KEY=0x... \
 #        bash development/evals/e2e-fase4.sh
+#
+# Auth (Fase 6): los 9 servicios corren con AUTH_MODE=hmac, así que todas las
+# llamadas (mutaciones y lecturas no públicas) llevan X-Service-Key; compliance
+# e issuer exigen además HMAC (X-Service-Id / X-Timestamp / X-Signature,
+# serviceId "e2e") en mutaciones; compliance /kyc-attestation exige además la
+# firma EIP-712 del operador (X-Operator-*).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -34,6 +41,11 @@ CO="${CO:-https://compliance-production-f8c6.up.railway.app}"
 PO="${PO:-https://pob-api-production.up.railway.app}"
 CR="${CR:-https://credit-production-677c.up.railway.app}"
 GATEWAY="${GATEWAY:?GATEWAY=<url gateway-demo> es requerido (gateway-demo aún no desplegado)}"
+E2E_SERVICE_KEY="${E2E_SERVICE_KEY:?E2E_SERVICE_KEY=<X-Service-Key del caller e2e> es requerido}"
+E2E_HMAC_SECRET="${E2E_HMAC_SECRET:?E2E_HMAC_SECRET=<secret HMAC con serviceId e2e> es requerido}"
+E2E_OPERATOR_KEY="${E2E_OPERATOR_KEY:?E2E_OPERATOR_KEY=<clave del operador KYC> es requerido}"
+E2E_SERVICE_ID="e2e"
+export E2E_HMAC_SECRET E2E_SERVICE_ID
 
 export AGENT_ID="e2e-fase4-$(date +%s)"
 export OPERATOR="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
@@ -48,10 +60,50 @@ step() { printf '\n[step %s] %s\n' "$1" "$2"; }
 ok()   { printf '  PASS: %s\n' "$*"; PASS=$((PASS + 1)); }
 ko()   { printf '  FAIL: %s\n' "$*" >&2; FAIL=$((FAIL + 1)); }
 
-http() { # http <method> <url> [json-body] → imprime body; guarda código en $HTTP_CODE_FILE
+# Firma HMAC de servicio (formato EXACTO de packages/sdk-auth/src/index.ts):
+#   bodySha = sha256(rawBody en bytes; '' si no hay body) → hex
+#   message = METHOD \n pathname \n bodySha
+#   X-Signature = 'sha256=' + hex(HMAC-SHA256(secret, message))
+# X-Timestamp es epoch en milisegundos (ventana ±5 min); el servidor deriva el
+# anti-replay nonce de (signature, timestamp), así que cada envío lleva su
+# propio timestamp. CRÍTICO: el body firmado y el enviado deben ser los mismos
+# bytes — http() firma la variable y la envía con --data-binary.
+HMAC_ARGS=()
+hmac_args() { # hmac_args <method> <url> <body> → llena el array HMAC_ARGS
+  local method="$1" url="$2" body="${3:-}" out ts sig
+  local path="$url"
+  path="${path#*://}"          # quita esquema
+  path="${path#*/}"            # quita host → ruta SIN '/' inicial (Git Bash
+                               # convierte valores de env que empiezan por '/')
+  out="$(printf '%s' "$body" | HMAC_METHOD="$method" HMAC_ROUTE="$path" node -e '
+    const crypto = require("node:crypto");
+    let d = "";
+    process.stdin.on("data", (c) => { d += c; });
+    process.stdin.on("end", () => {
+      const bodySha = crypto.createHash("sha256").update(d, "utf8").digest("hex");
+      const msg = [process.env.HMAC_METHOD, "/" + process.env.HMAC_ROUTE, bodySha].join("\n");
+      const sig = "sha256=" + crypto.createHmac("sha256", process.env.E2E_HMAC_SECRET).update(msg).digest("hex");
+      process.stdout.write(Date.now() + "\n" + sig + "\n");
+    });
+  ')" || { echo "hmac_args: fallo firmando" >&2; return 1; }
+  ts="$(printf '%s\n' "$out" | sed -n 1p)"
+  sig="$(printf '%s\n' "$out" | sed -n 2p)"
+  HMAC_ARGS=(-H "X-Service-Id: $E2E_SERVICE_ID" -H "X-Timestamp: $ts" -H "X-Signature: $sig")
+}
+
+http() { # http <method> <url> [json-body] [curl args extra...] → imprime body; guarda código en $HTTP_CODE_FILE
   local method="$1" url="$2" body="${3:-}"
-  local args=(curl -sS -o /tmp/e2e-fase4-body.json -w '%{http_code}' -X "$method" "$url" --max-time 15)
-  [[ -n "$body" ]] && args+=(-H 'content-type: application/json' -d "$body")
+  local args=(curl -sS -o /tmp/e2e-fase4-body.json -w '%{http_code}' -X "$method" "$url" --max-time 15 -H "X-Service-Key: $E2E_SERVICE_KEY")
+  case "$url" in
+    "$CO/"*|"$IS/"*)
+      if [[ "$method" == "POST" ]]; then
+        hmac_args "$method" "$url" "$body"
+        args+=("${HMAC_ARGS[@]}")
+      fi
+      ;;
+  esac
+  [[ -n "$body" ]] && args+=(-H 'content-type: application/json' --data-binary "$body")
+  args+=("${@:4}")
   echo "$("${args[@]}" || echo 000)" > "$HTTP_CODE_FILE"
   cat /tmp/e2e-fase4-body.json
 }
@@ -68,12 +120,42 @@ for url in "$CH/healthz" "$IS/healthz" "$RE/healthz" "$CO/healthz" "$PO/healthz"
 done
 
 # --- Paso 1: KYC firmado (compliance) -----------------------------------------
-step 1 "KYC firmado — compliance /kyc-attestation"
-KYC_JSON="$(http POST "$CO/kyc-attestation" "{\"operatorAddress\":\"$OPERATOR\"}" || true)"
-if expect_code 201 "atestación KYC emitida"; then
-  if printf '%s' "$KYC_JSON" | grep -q '"signature"'; then ok "KYC incluye firma EIP-712"; else ko "KYC sin signature"; fi
+step 1 "KYC firmado — compliance /kyc-attestation (EIP-712 operador + HMAC)"
+# Firma EIP-712 del operador ANTES de llamar: dominio {name:'AGENT.ID',version:'1'},
+# tipo OperatorAttestation {operatorAddress, purpose:'kyc-attestation', nonce,
+# timestamp uint64 en ms} (contrato EXACTO de packages/sdk-auth).
+if OP_LINE="$(cd "$AGENTID/apps/compliance" && node --input-type=module -e "
+  const { ethers } = await import('ethers');
+  const wallet = new ethers.Wallet(process.env.E2E_OPERATOR_KEY);
+  const nonce = 'e2e-kyc-' + crypto.randomUUID();
+  const timestamp = String(Date.now());
+  const domain = { name: 'AGENT.ID', version: '1' };
+  const types = { OperatorAttestation: [
+    { name: 'operatorAddress', type: 'address' },
+    { name: 'purpose', type: 'string' },
+    { name: 'nonce', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+  ] };
+  const message = { operatorAddress: wallet.address, purpose: 'kyc-attestation', nonce, timestamp: BigInt(timestamp) };
+  const sig = await wallet.signTypedData(domain, types, message);
+  console.log(wallet.address + '\n' + nonce + '\n' + timestamp + '\n' + sig);
+" 2>/dev/null)" && [[ -n "$OP_LINE" ]]; then
+  OP_ADDR="$(printf '%s\n' "$OP_LINE" | sed -n 1p)"
+  OP_NONCE="$(printf '%s\n' "$OP_LINE" | sed -n 2p)"
+  OP_TS="$(printf '%s\n' "$OP_LINE" | sed -n 3p)"
+  OP_SIG="$(printf '%s\n' "$OP_LINE" | sed -n 4p)"
+  KYC_JSON="$(http POST "$CO/kyc-attestation" "{\"operatorAddress\":\"$OP_ADDR\"}" \
+    -H "X-Operator-Address: $OP_ADDR" \
+    -H "X-Operator-Signature: $OP_SIG" \
+    -H "X-Operator-Nonce: $OP_NONCE" \
+    -H "X-Operator-Timestamp: $OP_TS" || true)"
+  if expect_code 201 "atestación KYC emitida"; then
+    if printf '%s' "$KYC_JSON" | grep -q '"signature"'; then ok "KYC incluye firma EIP-712"; else ko "KYC sin signature"; fi
+  else
+    ko "KYC response: $KYC_JSON"
+  fi
 else
-  ko "KYC response: $KYC_JSON"
+  ko "no se pudo firmar el EIP-712 del operador (¿E2E_OPERATOR_KEY inválida?)"
 fi
 
 # --- Paso 2: reto + respuesta (challenges) -------------------------------------

@@ -7,7 +7,7 @@ import { applyRateLimit, applyServiceAuth } from './auth.js';
 const SERVICE = 'credit';
 
 async function main(): Promise<void> {
-  const app = Fastify({ logger: true });
+  const app = Fastify({ logger: true, trustProxy: true });
   const counters = { scores: 0 };
   registerMetrics(app, { service: SERVICE, business: counters });
 

@@ -23,8 +23,19 @@ jobs:
       - name: E2E Fase 4 en vivo contra Railway
         env:
           POB_KEY: "${{ secrets.E2E_POB_KEY }}"
+          E2E_SERVICE_KEY: "${{ secrets.E2E_SERVICE_KEY }}"
+          E2E_HMAC_SECRET: "${{ secrets.E2E_HMAC_SECRET }}"
+          E2E_OPERATOR_KEY: "${{ secrets.E2E_OPERATOR_KEY }}"
           GATEWAY: https://gateway-demo-production-6e65.up.railway.app
         run: bash e2e/e2e-fase4.sh
+      - name: E2E auth-required (Fase 6)
+        env:
+          POB_KEY: "${{ secrets.E2E_POB_KEY }}"
+          E2E_SERVICE_KEY: "${{ secrets.E2E_SERVICE_KEY }}"
+          E2E_HMAC_SECRET: "${{ secrets.E2E_HMAC_SECRET }}"
+          E2E_OPERATOR_KEY: "${{ secrets.E2E_OPERATOR_KEY }}"
+          GATEWAY: https://gateway-demo-production-6e65.up.railway.app
+        run: bash e2e/e2e-auth.sh
       - name: Subir reportes
         if: always()
         uses: actions/upload-artifact@v4

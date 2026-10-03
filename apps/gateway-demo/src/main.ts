@@ -17,7 +17,7 @@ function allowedTargetsFromEnv(): Record<string, string[]> | undefined {
 }
 
 export async function createApp(enforcer?: GatewayEnforcer): Promise<FastifyInstance> {
-  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: true });
   const client = enforcer ?? new GatewayEnforcer({ allowedTargetsByAgent: allowedTargetsFromEnv() });
 
   // El gateway tiene su propia lógica de enforcement (/enforce queda público).

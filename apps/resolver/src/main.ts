@@ -88,7 +88,7 @@ export function verifyAttestation(entry: CachedAttestation): { valid: boolean; r
   }
 }
 
-const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: true });
 
 // Store de rate limit: Redis si hay REDIS_URL; in-memory si no.
 const rateLimitRedis = process.env.REDIS_URL

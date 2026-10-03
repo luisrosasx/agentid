@@ -27,7 +27,7 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
   const records = deps?.records ?? openRecordsStore(pool);
   const counters = { receipts: 0, scores: 0, crossAttests: 0, settles: 0, slashes: 0 };
 
-  const app = Fastify({ logger: false });
+  const app = Fastify({ logger: false, trustProxy: true });
   registerMetrics(app, { service: SERVICE, business: counters });
   await applyRateLimit(app);
   applyServiceAuth(app);

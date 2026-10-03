@@ -107,7 +107,7 @@ function newChallenge(agentId: string): Challenge {
   };
 }
 
-const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: true });
 
 const counters = { challenges_issued: 0 };
 registerMetrics(app, { service: 'challenges', business: counters });

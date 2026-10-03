@@ -110,7 +110,7 @@ async function ensureTable(): Promise<void> {
   `);
 }
 
-const app: FastifyInstance = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' } });
+const app: FastifyInstance = Fastify({ logger: { level: process.env.LOG_LEVEL ?? 'info' }, trustProxy: true });
 
 const counters = { attestations_issued: 0 };
 registerMetrics(app, { service: 'issuer', business: counters });

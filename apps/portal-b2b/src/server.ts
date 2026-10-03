@@ -24,7 +24,7 @@ export interface BuildAppOptions {
 }
 
 export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInstance> {
-  const app = Fastify({ logger: opts.logger ?? false });
+  const app = Fastify({ logger: opts.logger ?? false, trustProxy: true });
   const counters = { fleet_queries: 0 };
   await app.register(formbody);
   registerMetrics(app, { service: SERVICE, business: counters });
