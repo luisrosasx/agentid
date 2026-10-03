@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "outDir": null,
+    "rootDir": "."
+  },
+  "include": ["hardhat.config.ts", "test/**/*.ts", "typechain-types/**/*.ts"]
+}

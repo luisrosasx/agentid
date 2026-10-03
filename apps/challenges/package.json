@@ -1,0 +1,20 @@
+{
+  "name": "@agentid/challenges",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "cross-env NODE_ENV=test tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.10",
+    "cross-env": "^7.0.3"
+  }
+}
