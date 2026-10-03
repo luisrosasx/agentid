@@ -357,3 +357,12 @@ test('cache: isValid tolerates raw epoch-ms numbers (issuer form) and bigint sec
   assert.equal(cache.isValid(secEntry, nowSec), true);
   assert.equal(cache.isValid(secEntry, nowSec + 3601n), false);
 });
+
+test('wildcard: allowlist "*" cubre cualquier agente (para el e2e con agentId dinámico)', async () => {
+  const { entry } = await makeResolverBody(Math.floor(Date.now() / 1000), 3600);
+  const stub = stubFetch((path) => (path.endsWith(`/resolve/${encodeURIComponent(AGENT)}`) ? { valid: true, ...entry } : undefined), creditOk);
+  const enforcer = makeEnforcer(stub.fetchFn, { allowedTargetsByAgent: { '*': ['demo-target'] } });
+  await enforcer.enforce(AGENT, 'demo-target', 10n);
+  const d = await enforcer.enforce(AGENT, 'demo-target', 10n);
+  assert.equal(d.outcome, 'allow');
+});

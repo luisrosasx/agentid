@@ -56,7 +56,7 @@ export class GatewayEnforcer {
       if (!this.cache.isValid(entry, BigInt(Math.floor(nowMs / 1000)))) {
         return this.deny(agentId, 'ATTESTATION_EXPIRED', false);
       }
-      const allowed = this.allowedTargetsByAgent[agentId];
+      const allowed = this.allowedTargetsByAgent[agentId] ?? this.allowedTargetsByAgent['*'];
       // Fail-closed (EP-26, Fase 6): sin allowlist configurada para el agente
       // (o allowlist vacía) → deny TARGET_NOT_ALLOWED. Con allowlist y target
       // fuera de ella → deny igual.
