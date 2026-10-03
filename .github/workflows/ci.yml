@@ -22,6 +22,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r build
       - run: pnpm -r test
-      - name: Hardhat contracts (determinista: clean + compile + test)
+      - name: "Hardhat contracts (determinista: clean + compile + test)"
         run: npx hardhat clean && npx hardhat compile && npx hardhat test
         working-directory: contracts

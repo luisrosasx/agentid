@@ -22,7 +22,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: E2E Fase 4 en vivo contra Railway
         env:
-          POB_KEY: ${{ secrets.E2E_POB_KEY }}
+          POB_KEY: "${{ secrets.E2E_POB_KEY }}"
           GATEWAY: https://gateway-demo-production-6e65.up.railway.app
         run: bash e2e/e2e-fase4.sh
       - name: Subir reportes
