@@ -2,9 +2,14 @@ import Fastify from 'fastify';
 import { keccak256, toUtf8Bytes, concat } from 'ethers';
 import { Pool } from 'pg';
 import { registerMetrics } from './metrics.js';
+import { anchorOnChain, resolveOnchainConfig } from './onchain.js';
 
 const MAX_BATCH = 1000;
 const ANCHOR_MODE = process.env.ANCHOR_MODE ?? 'sim';
+const ALLOWED_MODES = new Set(['sim', 'real']);
+if (!ALLOWED_MODES.has(ANCHOR_MODE)) {
+  throw new Error(`ANCHOR_MODE inválido: '${ANCHOR_MODE}' (usar sim|real)`);
+}
 
 function merkleRoot(leaves: string[]): string {
   if (leaves.length === 0) return keccak256(toUtf8Bytes('agentid:empty'));
@@ -81,10 +86,27 @@ app.post<{ Body: { attestations?: unknown[] } }>('/anchor', async (req, reply) =
   const leaves = attestations.map((a, i) => keccak256(toUtf8Bytes(`${i}:${JSON.stringify(a)}`)));
   const root = merkleRoot(leaves);
   const anchoredAt = new Date();
-  const txHash =
-    ANCHOR_MODE === 'sim'
-      ? keccak256(toUtf8Bytes(`agentid:sim:${root}:${attestations.length}:${anchoredAt.getTime()}`))
-      : '';
+  let txHash = '';
+  if (ANCHOR_MODE === 'real') {
+    const cfg = resolveOnchainConfig(process.env);
+    if (!cfg) {
+      return reply.code(503).send({
+        error:
+          'modo real requiere DEPLOYER_PRIVATE_KEY y deployments.json (BehaviorProof) en Base Sepolia',
+      });
+    }
+    try {
+      const result = await anchorOnChain(cfg, root);
+      txHash = result.txHash;
+    } catch (err) {
+      app.log.error({ err }, 'on-chain anchor failed');
+      return reply.code(502).send({ error: 'on-chain anchor failed', detail: String(err) });
+    }
+  } else {
+    txHash = keccak256(
+      toUtf8Bytes(`agentid:sim:${root}:${attestations.length}:${anchoredAt.getTime()}`),
+    );
+  }
   await saveAnchor({ root, leafCount: attestations.length, anchoredAt, mode: ANCHOR_MODE, txHash });
   counters.anchors += 1;
   return reply.code(201).send({ root, leafCount: attestations.length, anchoredAt: anchoredAt.toISOString(), mode: ANCHOR_MODE, txHash });

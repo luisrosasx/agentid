@@ -1,0 +1,10 @@
+{
+  "//": "Plantilla: lo genera contracts/scripts/deploy.ts al desplegar en Base Sepolia.",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "contracts": {
+    "AgentIdRegistry": "0x0000000000000000000000000000000000000000",
+    "CertIssuer": "0x0000000000000000000000000000000000000000",
+    "BehaviorProof": "0x0000000000000000000000000000000000000000"
+  }
+}

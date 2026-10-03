@@ -124,6 +124,31 @@ importers:
         specifier: ^5.6.0
         version: 5.9.3
 
+  apps/gateway-demo:
+    dependencies:
+      '@agentid/sdk-gateway':
+        specifier: workspace:*
+        version: link:../../packages/sdk-gateway
+      fastify:
+        specifier: ^4.28.1
+        version: 4.29.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.15
+    devDependencies:
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      ethers:
+        specifier: ^6.13.4
+        version: 6.17.0
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
   apps/issuer:
     dependencies:
       ethers:
@@ -253,6 +278,28 @@ importers:
       '@agentid/schemas':
         specifier: workspace:*
         version: link:../schemas
+      ethers:
+        specifier: ^6.13.0
+        version: 6.17.0
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.1
+      tsx:
+        specifier: ^4.19.0
+        version: 4.23.15
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
+  packages/sdk-gateway:
+    dependencies:
+      '@agentid/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      '@agentid/sdk-verifier':
+        specifier: workspace:*
+        version: link:../sdk-verifier
       ethers:
         specifier: ^6.13.0
         version: 6.17.0
