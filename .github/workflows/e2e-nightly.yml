@@ -1,0 +1,45 @@
+name: e2e-nightly
+
+on:
+  schedule:
+    - cron: '7 3 * * *' # UTC; anti-herd: minuto no redondo
+  workflow_dispatch:
+
+jobs:
+  e2e-fase4:
+    runs-on: ubuntu-latest
+    # Job diagnóstico, no gate: reporta, no bloquea merges.
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: E2E Fase 4 en vivo contra Railway
+        env:
+          POB_KEY: ${{ secrets.E2E_POB_KEY }}
+          GATEWAY: https://gateway-demo-production-6e65.up.railway.app
+        run: bash e2e/e2e-fase4.sh
+      - name: Subir reportes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          retention-days: 7
+          path: |
+            /tmp/*.json
+            /tmp/*.log
+          if-no-files-found: ignore
+      - name: Abrir issue ante fallo
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create -R luisrosasx/agentid \
+            --title "e2e-nightly FAIL $(date -u +%F)" \
+            --body "El job e2e-nightly falló. Ver logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
