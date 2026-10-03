@@ -17,13 +17,15 @@ export interface ResolverEntry {
 export class ResolverClient {
   private readonly url: string;
   private readonly timeoutMs: number;
+  private readonly serviceKey: string | undefined;
 
   constructor(
-    opts: { resolverUrl?: string; fetchFn?: typeof fetch; timeoutMs?: number } = {},
+    opts: { resolverUrl?: string; fetchFn?: typeof fetch; timeoutMs?: number; serviceKey?: string } = {},
   ) {
     this.url = (opts.resolverUrl ?? process.env.RESOLVER_URL ?? 'http://localhost:3000').replace(/\/$/, '');
     this.timeoutMs = opts.timeoutMs ?? Number(process.env.RESOLVER_TIMEOUT_MS ?? 500);
     this.fetchFn = opts.fetchFn ?? fetch.bind(globalThis);
+    this.serviceKey = opts.serviceKey ?? process.env.OUTBOUND_SERVICE_KEY ?? undefined;
   }
 
   private fetchFn: typeof fetch;
@@ -33,6 +35,7 @@ export class ResolverClient {
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       const res = await this.fetchFn(`${this.url}/resolve/${encodeURIComponent(agentId)}`, {
+        headers: this.serviceKey ? { 'X-Service-Key': this.serviceKey } : undefined,
         signal: controller.signal,
       });
       if (!res.ok) return null;
@@ -68,11 +71,13 @@ export interface CreditPolicy {
 export class CreditClient {
   private readonly url: string;
   private readonly timeoutMs: number;
+  private readonly serviceKey: string | undefined;
   private fetchFn: typeof fetch;
 
-  constructor(opts: { creditUrl?: string; fetchFn?: typeof fetch; timeoutMs?: number } = {}) {
+  constructor(opts: { creditUrl?: string; fetchFn?: typeof fetch; timeoutMs?: number; serviceKey?: string } = {}) {
     this.url = (opts.creditUrl ?? process.env.CREDIT_URL ?? 'http://localhost:3010').replace(/\/$/, '');
     this.timeoutMs = opts.timeoutMs ?? Number(process.env.CREDIT_TIMEOUT_MS ?? 500);
+    this.serviceKey = opts.serviceKey ?? process.env.OUTBOUND_SERVICE_KEY ?? undefined;
     this.fetchFn = opts.fetchFn ?? fetch.bind(globalThis);
   }
 
@@ -81,6 +86,7 @@ export class CreditClient {
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       const res = await this.fetchFn(`${this.url}/account/${encodeURIComponent(agentId)}`, {
+        headers: this.serviceKey ? { 'X-Service-Key': this.serviceKey } : undefined,
         signal: controller.signal,
       });
       if (!res.ok) return null;
