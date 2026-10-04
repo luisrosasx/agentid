@@ -1,0 +1,7 @@
+[package]
+name = "dc_subbatch"
+type = "bin"
+authors = ["AGENT.ID"]
+
+[dependencies]
+keccak256 = { path = "/root/lib_keccak" }

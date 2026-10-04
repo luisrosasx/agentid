@@ -5,7 +5,8 @@ import { writeFileSync } from 'node:fs';
 const ethers = createRequire(import.meta.url)('../../packages/sdk-receipts/node_modules/ethers');
 const { keccak256, getBytes } = ethers;
 
-const LEAVES = 1024, LEVELS = 10, ACTIVE = 64;
+const LEAVES = 1024, LEVELS = 10, ACTIVE = Number(process.argv.find(a=>a.startsWith('--active'))?.split('=')[1] ?? 64);
+const SEED = Number(process.argv.find(a=>a.startsWith('--seed'))?.split('=')[1] ?? 0);
 const bytes = (b) => getBytes(b);
 const keccakLeaf = (a20) => bytes(keccak256(a20));
 const keccakNode = (buf) => bytes(keccak256(buf));
@@ -14,10 +15,10 @@ const zeroLeaf = keccakLeaf(new Uint8Array(20));
 // 64 direcciones deterministas, asignadas a hojas espaciadas en el árbol
 const actives = Array.from({ length: ACTIVE }, (_, i) => {
   const a = Buffer.from(new Uint8Array(20));
-  a[0] = (i >> 8) & 0xff; a[1] = i & 0xff; a[2] = 0xab;
+  a[0] = ((SEED + i) >> 8) & 0xff; a[1] = (SEED + i) & 0xff; a[2] = 0xab;
   return { addr: a, weak: i % 10 === 3, weight: i % 10 === 3 ? 30 : 100 };
 });
-const activeLeafIdx = Array.from({ length: ACTIVE }, (_, i) => Math.floor(i * (LEAVES / ACTIVE)));
+const activeLeafIdx = Array.from({ length: ACTIVE }, (_, i) => Math.floor(i * (LEAVES / ACTIVE) + (SEED * 7) % Math.floor(LEAVES / ACTIVE)));
 const leafOf = new Map(activeLeafIdx.map((idx, i) => [idx, i]));
 
 const leaves = Array.from({ length: LEAVES }, (_, i) => (leafOf.has(i) ? keccakLeaf(actives[leafOf.get(i)].addr) : zeroLeaf));

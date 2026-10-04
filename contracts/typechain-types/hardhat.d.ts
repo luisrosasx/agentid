@@ -22,6 +22,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AgentIdRegistry__factory>;
     getContractFactory(
+      name: "BatchVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BatchVerifier__factory>;
+    getContractFactory(
+      name: "IHonkVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IHonkVerifier__factory>;
+    getContractFactory(
       name: "BehaviorProof",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BehaviorProof__factory>;
@@ -29,6 +37,26 @@ declare module "hardhat/types/runtime" {
       name: "CertIssuer",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CertIssuer__factory>;
+    getContractFactory(
+      name: "BaseHonkVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BaseHonkVerifier__factory>;
+    getContractFactory(
+      name: "Errors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Errors__factory>;
+    getContractFactory(
+      name: "HonkVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.HonkVerifier__factory>;
+    getContractFactory(
+      name: "IVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IVerifier__factory>;
+    getContractFactory(
+      name: "RelationsLib",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RelationsLib__factory>;
     getContractFactory(
       name: "BaseHonkVerifier",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -61,6 +89,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.AgentIdRegistry>;
     getContractAt(
+      name: "BatchVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BatchVerifier>;
+    getContractAt(
+      name: "IHonkVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IHonkVerifier>;
+    getContractAt(
       name: "BehaviorProof",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -70,6 +108,31 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.CertIssuer>;
+    getContractAt(
+      name: "BaseHonkVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BaseHonkVerifier>;
+    getContractAt(
+      name: "Errors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Errors>;
+    getContractAt(
+      name: "HonkVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.HonkVerifier>;
+    getContractAt(
+      name: "IVerifier",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IVerifier>;
+    getContractAt(
+      name: "RelationsLib",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RelationsLib>;
     getContractAt(
       name: "BaseHonkVerifier",
       address: string | ethers.Addressable,
@@ -105,6 +168,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AgentIdRegistry>;
     deployContract(
+      name: "BatchVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BatchVerifier>;
+    deployContract(
+      name: "IHonkVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IHonkVerifier>;
+    deployContract(
       name: "BehaviorProof",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BehaviorProof>;
@@ -112,6 +183,26 @@ declare module "hardhat/types/runtime" {
       name: "CertIssuer",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.CertIssuer>;
+    deployContract(
+      name: "BaseHonkVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BaseHonkVerifier>;
+    deployContract(
+      name: "Errors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Errors>;
+    deployContract(
+      name: "HonkVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.HonkVerifier>;
+    deployContract(
+      name: "IVerifier",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IVerifier>;
+    deployContract(
+      name: "RelationsLib",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RelationsLib>;
     deployContract(
       name: "BaseHonkVerifier",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -144,6 +235,16 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AgentIdRegistry>;
     deployContract(
+      name: "BatchVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BatchVerifier>;
+    deployContract(
+      name: "IHonkVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IHonkVerifier>;
+    deployContract(
       name: "BehaviorProof",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -153,6 +254,31 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.CertIssuer>;
+    deployContract(
+      name: "BaseHonkVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BaseHonkVerifier>;
+    deployContract(
+      name: "Errors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Errors>;
+    deployContract(
+      name: "HonkVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.HonkVerifier>;
+    deployContract(
+      name: "IVerifier",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IVerifier>;
+    deployContract(
+      name: "RelationsLib",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RelationsLib>;
     deployContract(
       name: "BaseHonkVerifier",
       args: any[],
