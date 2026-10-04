@@ -1,0 +1,6 @@
+[package]
+name = "distinct_counterparties"
+type = "bin"
+authors = ["AGENT.ID"]
+
+[dependencies]

@@ -134,10 +134,18 @@ fi
 # --- d) Rate limit: 40 POSTs /challenge → 429 en algún punto ----------------------
 step d "Rate limit — 40 POSTs /challenge con credencial válida (bucket 30/min)"
 GOT_429=0
+rm -f /tmp/e2e-auth-rl.log
 for i in $(seq 1 40); do
-  code="$(request POST "$CH/challenge" "{\"agentId\":\"$AGENT_ID-rl-$i\"}" -H "X-Service-Key: $E2E_SERVICE_KEY")" || true
-  if [[ "$code" == "429" ]]; then GOT_429=1; break; fi
+  (
+    c="$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST "$CH/challenge" \
+      -H 'content-type: application/json' \
+      -H "X-Service-Key: $E2E_SERVICE_KEY" \
+      --data-binary "{\"agentId\":\"$AGENT_ID-rl-$i\"}" 2>/dev/null || echo 000)"
+    printf '%s\n' "$c" >> /tmp/e2e-auth-rl.log
+  ) &
 done
+wait
+if grep -qx "429" /tmp/e2e-auth-rl.log 2>/dev/null; then GOT_429=1; fi
 if [[ "$GOT_429" == "1" ]]; then
   ok "429 en POST #$i (rate limit de mutación activo)"
 else
