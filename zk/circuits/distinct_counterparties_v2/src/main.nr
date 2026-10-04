@@ -88,11 +88,11 @@ fn verify_membership<let L: u32>(
 }
 
 fn main(
-    receipt_root: [u8; 32],
-    min_k: u32,
-    min_weight: u32,
-    window_start: u64,
-    window_end: u64,
+    receipt_root: pub [u8; 32],
+    min_k: pub u32,
+    min_weight: pub u32,
+    window_start: pub u64,
+    window_end: pub u64,
     counterparties: [[u8; 20]; SLOTS],
     used_flags: [bool; SLOTS],
     weak_flags: [bool; SLOTS],
