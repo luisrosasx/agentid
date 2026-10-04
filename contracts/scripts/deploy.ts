@@ -45,8 +45,8 @@ async function main(): Promise<void> {
   await behaviorProof.waitForDeployment();
 
   const record = {
-    network,
-    chainId: 84532,
+    network: network.name,
+    chainId: Number((await ethers.provider.getNetwork()).chainId),
     deployedAt: new Date().toISOString(),
     deployer: deployer.address,
     contracts: {
@@ -59,9 +59,12 @@ async function main(): Promise<void> {
 
   mkdirSync("deployments", { recursive: true });
   writeFileSync(`deployments/${network}.json`, JSON.stringify(record, null, 2) + "\n");
+  // deployments.json canónico para herramientas de verificación (e2e/verify-anchor.sh
+  // lo usa por defecto) y para el anchor en modo real
+  writeFileSync("deployments.json", JSON.stringify(record, null, 2) + "\n");
   writeFileSync(
     "../apps/anchor/src/deployments.json",
-    JSON.stringify({ network, chainId: record.chainId, contracts: record.contracts }, null, 2) + "\n",
+    JSON.stringify({ network: network.name, chainId: record.chainId, contracts: record.contracts }, null, 2) + "\n",
   );
 }
 

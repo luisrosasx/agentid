@@ -14,6 +14,8 @@ export interface OnchainConfig {
   privateKey: string;
   agentId: bigint;
   behaviorProof: string;
+  /** Por defecto 84532 (Base Sepolia); e2e local usa 31337 (hardhat). */
+  expectedChainId?: bigint;
 }
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -43,12 +45,13 @@ export function loadDeployments(path: string = DEPLOYMENTS_PATH): DeploymentsFil
 export function resolveOnchainConfig(
   env: NodeJS.ProcessEnv,
   deployments: DeploymentsFile | null = loadDeployments(),
+  expectedChainId: bigint = 84532n,
 ): OnchainConfig | null {
   const privateKey = env.DEPLOYER_PRIVATE_KEY;
   if (!privateKey) return null;
   const behaviorProof = deployments?.contracts?.BehaviorProof;
   if (!behaviorProof || !ethers.isAddress(behaviorProof)) return null;
-  if (deployments.chainId !== 84532) return null;
+  if (deployments.chainId !== Number(expectedChainId)) return null;
   const agentIdRaw = env.AGENTID_AGENT_ID;
   let agentId = 1n;
   if (agentIdRaw !== undefined) {
@@ -64,6 +67,7 @@ export function resolveOnchainConfig(
     privateKey,
     agentId,
     behaviorProof,
+    expectedChainId,
   };
 }
 
@@ -90,9 +94,10 @@ export async function anchorOnChain(
     new ethers.Contract(c.behaviorProof, ABI, wallet) as unknown as AnchorContract,
 ): Promise<OnchainResult> {
   const provider = providerFactory(cfg.rpcUrl);
+  const expected = cfg.expectedChainId ?? 84532n;
   const network = await provider.getNetwork();
-  if (network.chainId !== 84532n) {
-    throw new Error(`chainId inesperado ${network.chainId}, se esperaba 84532 (Base Sepolia)`);
+  if (network.chainId !== expected) {
+    throw new Error(`chainId inesperado ${network.chainId}, se esperaba ${expected}`);
   }
   const wallet = new ethers.Wallet(cfg.privateKey, provider);
   const contract = contractFactory(cfg, wallet);

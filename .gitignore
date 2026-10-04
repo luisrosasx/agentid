@@ -5,3 +5,6 @@ cache/
 coverage/
 .typechain/
 .env
+contracts/deployments.json
+contracts/deployments/
+apps/anchor/src/deployments.json

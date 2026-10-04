@@ -92,6 +92,66 @@ function pairHash(a: string, b: string): string {
   return keccak256(concat([a, b]));
 }
 
+/**
+ * Árbol de Merkle sobre hojas ya hasheadas (misma forma que usa el anchor:
+ * par de hojas = keccak(left || right); hoja impar se duplica).
+ */
+function buildLevels(leaves: string[]): string[][] {
+  let level = leaves.length === 1 ? [pairHash(leaves[0], leaves[0])] : [...leaves];
+  const levels: string[][] = [level];
+  while (level.length > 1) {
+    const next: string[] = [];
+    for (let i = 0; i < level.length; i += 2) {
+      const right = i + 1 < level.length ? level[i + 1] : level[i];
+      next.push(pairHash(level[i], right));
+    }
+    level = next;
+    levels.push(level);
+  }
+  return levels;
+}
+
+export function merkleRootFromLeaves(leaves: string[]): string {
+  if (leaves.length === 0) return keccak256(toUtf8Bytes('agentid:empty'));
+  const levels = buildLevels(leaves);
+  return hexlify(levels[levels.length - 1][0]);
+}
+
+export interface MerkleProofStep {
+  /** Hash hermano en ese nivel. */
+  sibling: string;
+  /** 'left' = el hermano va a la izquierda en el hash del par. */
+  position: 'left' | 'right';
+}
+
+export function merkleProofFromLeaves(leaves: string[], leafHash: string): MerkleProofStep[] | null {
+  const idx = leaves.indexOf(leafHash);
+  if (idx === -1) return null;
+  if (leaves.length === 1) {
+    // raíz de árbol de una sola hoja = pairHash(hoja, hoja)
+    return [{ sibling: hexlify(leafHash), position: 'right' }];
+  }
+  const levels = buildLevels(leaves);
+  const proof: MerkleProofStep[] = [];
+  let i = idx;
+  for (let l = 0; l < levels.length - 1; l++) {
+    const level = levels[l];
+    const isRight = i % 2 === 1;
+    const siblingIdx = isRight ? i - 1 : (i + 1 < level.length ? i + 1 : i);
+    proof.push({ sibling: hexlify(level[siblingIdx]), position: isRight ? 'left' : 'right' });
+    i = Math.floor(i / 2);
+  }
+  return proof;
+}
+
+export function verifyMerkleProof(leafHash: string, proof: MerkleProofStep[], root: string): boolean {
+  let node = leafHash;
+  for (const step of proof) {
+    node = step.position === 'left' ? pairHash(step.sibling, node) : pairHash(node, step.sibling);
+  }
+  return node.toLowerCase() === root.toLowerCase();
+}
+
 export function merkleRoot(receipts: BilateralReceiptMessage[]): string {
   if (receipts.length === 0) {
     return keccak256(toUtf8Bytes('AGENT.ID:empty-receipt-set'));

@@ -1,10 +1,13 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
-import { Wallet } from 'ethers';
+import { Wallet, keccak256, toUtf8Bytes } from 'ethers';
 
 import {
   merkleRoot,
+  merkleRootFromLeaves,
+  merkleProofFromLeaves,
+  verifyMerkleProof,
   receiptDigest,
   signReceipt,
   verifyReceipt,
@@ -78,3 +81,24 @@ test('signReceipt rejects malformed messages', async () => {
     () => signReceipt({ ...receipt(), outcome: 999 }, wallet),
   );
 });
+
+test('merkle proof verifies against root for every leaf', async () => {
+  const leaves = Array.from({ length: 7 }, (_, i) => keccak256(toUtf8Bytes(`leaf:${i}`)));
+  const root = merkleRootFromLeaves(leaves);
+  for (const leaf of leaves) {
+    const proof = merkleProofFromLeaves(leaves, leaf)!;
+    assert.equal(verifyMerkleProof(leaf, proof, root), true);
+  }
+  assert.equal(merkleProofFromLeaves(leaves, keccak256(toUtf8Bytes('nope'))), null);
+  const badProof = merkleProofFromLeaves(leaves, leaves[0])!;
+  assert.equal(verifyMerkleProof(leaves[0], badProof, keccak256(toUtf8Bytes('otro'))), false);
+});
+
+test('single-leaf proof and empty leaves', async () => {
+  const leaf = keccak256(toUtf8Bytes('solo'));
+  const root = merkleRootFromLeaves([leaf]);
+  const proof = merkleProofFromLeaves([leaf], leaf)!;
+  assert.equal(verifyMerkleProof(leaf, proof, root), true);
+  assert.equal(merkleRootFromLeaves([]), keccak256(toUtf8Bytes('agentid:empty')));
+});
+

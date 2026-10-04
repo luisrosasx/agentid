@@ -20,6 +20,9 @@ importers:
       '@agentid/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
+      '@agentid/sdk-receipts':
+        specifier: workspace:*
+        version: link:../../packages/sdk-receipts
       '@fastify/rate-limit':
         specifier: ^9.1.0
         version: 9.1.0
