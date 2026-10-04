@@ -35,7 +35,8 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
   applyOperatorAuth(app);
 
   // Error handler genérico: nada de stack traces ni IDs internos.
-  app.setErrorHandler((err, req, reply) => {
+  app.setErrorHandler((rawErr, req, reply) => {
+    const err = rawErr as { statusCode?: number; name?: string; message?: string };
     const status = typeof err.statusCode === 'number' ? err.statusCode : 500;
     if (status >= 500) {
       req.log.error({ err }, 'unhandled error');
