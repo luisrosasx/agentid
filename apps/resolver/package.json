@@ -11,7 +11,7 @@
     "@agentid/sdk-auth": "workspace:*",
     "@fastify/rate-limit": "^9.1.0",
     "ethers": "^6.13.4",
-    "fastify": "^4.28.1",
+    "fastify": "^5.12.5",
     "ioredis": "^5.4.1",
     "tsx": "^4.19.2"
   },
