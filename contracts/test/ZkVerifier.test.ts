@@ -19,8 +19,8 @@ function fieldOf(bytes: Buffer): string {
 
 describe('EP-19 ZK — HonkVerifier (distinctCounterparties)', () => {
   it('verifica on-chain la prueba real del circuito (5 contrapartes distintas, weightSum>=400)', async () => {
-    const relations = await (await ethers.getContractFactory('RelationsLib')).deploy();
-    const verifier = await ethers.getContractFactory('HonkVerifier', { libraries: { RelationsLib: await relations.getAddress() } });
+    const relations = await (await ethers.getContractFactory('contracts/HonkVerifier.sol:RelationsLib')).deploy();
+    const verifier = await ethers.getContractFactory('contracts/HonkVerifier.sol:HonkVerifier', { libraries: { RelationsLib: await relations.getAddress() } });
     const v = await verifier.deploy();
     await v.waitForDeployment();
 
@@ -47,8 +47,8 @@ describe('EP-19 ZK — HonkVerifier (distinctCounterparties)', () => {
   });
 
   it('rechaza una prueba manipulada (flip de un byte del proof)', async () => {
-    const relations = await (await ethers.getContractFactory('RelationsLib')).deploy();
-    const verifier = await ethers.getContractFactory('HonkVerifier', { libraries: { RelationsLib: await relations.getAddress() } });
+    const relations = await (await ethers.getContractFactory('contracts/HonkVerifier.sol:RelationsLib')).deploy();
+    const verifier = await ethers.getContractFactory('contracts/HonkVerifier.sol:HonkVerifier', { libraries: { RelationsLib: await relations.getAddress() } });
     const v = await verifier.deploy();
     await v.waitForDeployment();
 

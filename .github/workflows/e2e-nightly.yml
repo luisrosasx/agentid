@@ -54,3 +54,33 @@ jobs:
           gh issue create -R luisrosasx/agentid \
             --title "e2e-nightly FAIL $(date -u +%F)" \
             --body "El job e2e-nightly falló. Ver logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+
+  zk-adversarial:
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descargar toolchain Noir + Barretenberg (linux amd64 nativo)
+        run: |
+          mkdir -p /tmp/noir
+          curl -sL -o /tmp/noir/noir.tar.gz https://github.com/noir-lang/noir/releases/download/v1.0.0-rc.2/noir-x86_64-unknown-linux-musl.tar.gz
+          curl -sL -o /tmp/noir/bb.tar.gz https://github.com/AztecProtocol/barretenberg/releases/download/v6.0.0-rc.2/barretenberg-amd64-linux.tar.gz
+          tar xzf /tmp/noir/noir.tar.gz -C /tmp/noir && chmod +x /tmp/noir/nargo
+          tar xzf /tmp/noir/bb.tar.gz -C /tmp/noir && chmod +x /tmp/noir/bb
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Suite adversarial ZK (muestra 50 + espejo 10k)
+        run: node zk/tests/adversarial.mjs --sample=50
+      - name: Subir reporte adversarial
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zk-adversarial-report
+          retention-days: 7
+          path: zk/adversarial-report.md

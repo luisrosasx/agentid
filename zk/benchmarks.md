@@ -37,15 +37,30 @@ Circuito `dc_bench` (mismo pipeline, sin slots de padding: solo los 64 activos c
 | Prove (`bb prove --write_vk`) | >10 min en VM de 16 GB (2^25 gates — see nota) |
 | Verify (`bb verify`) | ~0.1 s |
 
-## Decisión binaria S2-T2
+## S3 — Estrategia incremental por sub-lotes (medición real)
 
-**El objetivo <5 s/lote de ≤1k recibos NO se cumple con el circuito monolítico**
-(el prove de 2^25 gates excede con holgura el presupuesto, además de la huella de
-memoria de la compilación del VK, ~7 GB pico). **Se activa el plan B documentado
-(EP-19-S3, recursión incremental)**: pruebas por sub-lote (≤128 recibos ≈ 2^19-2^20
-gates) agregadas incrementalmente sobre el acumulador de la prueba anterior, con
-`strategy: "monolithic" | "incremental"` en el SDK de prueba. El S1-v2 (32 slots,
-~2 s) valida que sub-lotes de ese tamaño SÍ cumplen el presupuesto por iteración.
+Circuito `dc_subbatch` (sub-lote de **4 contrapartes activas** × 10 niveles sobre
+árbol de 1024 hojas; mismo pipeline):
+
+| Métrica | Valor medido |
+|---|---|
+| Circuit size | **1,458,939 gates (~2^21)** |
+| Setup una vez (compile + witness + `bb write_vk`) | 22–36 s |
+| Prove por sub-prueba (VK cacheado, VM tibia) | **10–16 s** (var: 10,5 / 25,5 / 30,6 / 11 / 12 / 16 s) |
+| Verify por sub-prueba | **0,13–0,25 s** |
+| Agregación on-chain (`BatchVerifier.verifyBatch`, red Hardhat local) | 2 sub-pruebas en **1 tx** (861 ms con deploy incluido; solo-verificación ~300-500 ms) |
+| **Lote de 256 recibos end-to-end** (`prove-batch.sh --size 4 --count 64`) | **64/64 sub-pruebas verificadas**, ~12 s c/u ≈ **13 min total** en este entorno |
+
+**Decisión del tamaño de sub-lote:** 4 activos (16 s/prove medio en este entorno). El
+entorno ejecuta amd64 EMULADO sobre host ARM64 (Docker Desktop/WSL2), lo que infla los
+tiempos ~5-10×; en hardware amd64 nativo el mismo circuito estaría en 2-4 s. La estrategia
+incremental es la única viable: el monolítico (23,45M gates) excede por completo.
+
+Agregación práctica (S3-T1 implementado como plan B): sub-pruebas independientes con la
+MISMA VK (circuito fijo) → `BatchVerifier.verifyBatch(proofs[], publicInputs[][])` las
+verifica todas en una transacción (loop sobre `HonkVerifier.verify`); cada sub-lote lleva
+su propia sub-raíz (árbol de 1024 hojas, 4 contrapartes por sub-lote, seeds deterministas).
+La recursión in-circuito real (ClientIVC) queda como evolución documentada.
 
 ## Nota de entorno (reproducibilidad)
 

@@ -13,7 +13,7 @@
 
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
-import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const ethers = createRequire(import.meta.url)('../../packages/sdk-receipts/node_modules/ethers');
@@ -144,9 +144,15 @@ if (SAMPLE > 0) {
       + `siblings = [\n${d.siblings.map((s) => `  [${s.map((x) => hex(x)).join(', ')}]`).join(',\n')}\n]\n`
       + `selectors = [\n${d.selectors.map((s) => `  [${s.map((x) => x.toString())}]`).join(',\n')}\n]\n`;
     writeFileSync(join(CIRC, 'Prover.toml'), toml);
-    const code = execSync(
-      `MSYS_NO_PATHCONV=1 docker run --rm --platform linux/amd64 -v "$(cygpath -w '${NOIR}'):/noir" -v "$(cygpath -w '${CIRC}'):/circ" -v "$(cygpath -w '${keccakLib}'):/root/lib_keccak" -w /circ debian:12-slim sh -c '/noir/nargo execute >/dev/null 2>&1; echo $?'`,
-      { encoding: 'utf8', cwd: AGENTID }).trim();
+    let code;
+    if (existsSync(join(NOIR, 'nargo'))) {
+      // toolchain nativa disponible (CI linux / binarios instalados): ejecución directa
+      code = execSync(`cd ${JSON.stringify(CIRC)} && ${JSON.stringify(join(NOIR, 'nargo'))} execute >/dev/null 2>&1; echo $?`,
+        { encoding: 'utf8', cwd: AGENTID, shell: 'bash' }).trim();
+    } else {
+      const cmd = `MSYS_NO_PATHCONV=1 docker run --rm --platform linux/amd64 -v "$(cygpath -w '${NOIR}'):/noir" -v "$(cygpath -w '${CIRC}'):/circ" -v "$(cygpath -w '${keccakLib}'):/root/lib_keccak" -w /circ debian:12-slim sh -c '/noir/nargo execute >/dev/null 2>&1; echo $?'`;
+      code = execSync(`bash -lc ${JSON.stringify(cmd)}`, { encoding: 'utf8', cwd: AGENTID }).trim();
+    }
     realRuns++;
     if (code === '0') { mismatches++; console.error('MISMATCH: el circuito REAL aceptó', c.cls); }
   }
