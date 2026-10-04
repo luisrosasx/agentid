@@ -177,13 +177,13 @@ export namespace SlashedEvent {
   export type InputTuple = [
     agentId: BigNumberish,
     by: AddressLike,
-    at: BigNumberish
+    slashedAt: BigNumberish
   ];
-  export type OutputTuple = [agentId: bigint, by: string, at: bigint];
+  export type OutputTuple = [agentId: bigint, by: string, slashedAt: bigint];
   export interface OutputObject {
     agentId: bigint;
     by: string;
-    at: bigint;
+    slashedAt: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;

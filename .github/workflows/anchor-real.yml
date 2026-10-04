@@ -1,0 +1,83 @@
+name: anchor-real
+
+on:
+  schedule:
+    - cron: '17 7,13,19,1 * * *' # 4×/día, anti-herd (minuto no redondo)
+  workflow_dispatch:
+
+# El paso real a Base Sepolia está gated al fondeo del deployer.
+# Con balance > umbral: deploy de contratos → commit deployments.json → verify on-chain → issue con evidencia.
+# Con balance 0: termina silenciosamente (exit 0) — "esperando fondeo".
+
+jobs:
+  anchor-real:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYER_ADDRESS: "0x2255C83Ffec54a198Ef9d1A828A49203a6681528"
+      RPC: "https://sepolia.base.org"
+      MIN_WEI: "500000000000000" # 0.0005 ETH
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Poll de balance del deployer
+        id: balance
+        run: |
+          BAL=$(curl -s -X POST "$RPC" -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","method":"eth_getBalance","params":["'"$DEPLOYER_ADDRESS"'","latest"],"id":1}' \
+            | python3 -c 'import json,sys;print(json.load(sys.stdin).get("result","0x0"))')
+          WEI=$(python3 -c "print(int('$BAL',16))")
+          echo "wei=$WEI" >> "$GITHUB_OUTPUT"
+          if [ "$WEI" -lt "$MIN_WEI" ]; then
+            echo "esperando fondeo: $DEPLOYER_ADDRESS tiene $WEI wei (< $MIN_WEI). No se hace nada."
+            exit 0
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+
+      - name: Deploy de contratos a Base Sepolia
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        env:
+          DEPLOYER_PRIVATE_KEY: "${{ secrets.DEPLOYER_PRIVATE_KEY }}"
+          BASE_SEPOLIA_RPC_URL: "https://sepolia.base.org"
+        run: cd contracts && npx hardhat run scripts/deploy.ts --network baseSepolia
+
+      - name: Verificación on-chain (bytecode presente en las 3 addresses)
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        run: |
+          for c in AgentIdRegistry CertIssuer BehaviorProof; do
+            ADDR=$(python3 -c "import json;print(json.load(open('contracts/deployments.json'))['contracts']['$c'])")
+            SIZE=$(curl -s -X POST "$RPC" -H 'Content-Type: application/json' \
+              -d '{"jsonrpc":"2.0","method":"eth_getCode","params":["'"$ADDR"'","latest"],"id":1}' \
+              | python3 -c 'import json,sys;r=json.load(sys.stdin)["result"];print(len(r))')
+            test "$SIZE" -gt 2 || { echo "FAIL: $c ($ADDR) sin bytecode"; exit 1; }
+            echo "$c @ $ADDR bytecode ok ($SIZE bytes hex)"
+          done
+
+      - name: Commit de deployments.json (84532)
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        run: |
+          git config user.name "anchor-real-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -f contracts/deployments.json
+          git diff --cached --quiet || git commit -m "anchor-real: deploy de contratos en Base Sepolia (84532)"
+          git push
+
+      - name: Issue con evidencia + paso final manual (ANCHOR_MODE=real)
+        if: steps.balance.outputs.wei >= env.MIN_WEI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create -R "${{ github.repository }}" \
+            --title "anchor-real: contratos deployados en Base Sepolia — flip ANCHOR_MODE" \
+            --body "Deploy completado (chainId 84532), bytecode verificado. deployments.json commiteado.
+            Paso final (requiere Railway): poner \`ANCHOR_MODE=real\` en el servicio **anchor** (+ \`DEPLOYER_PRIVATE_KEY\`, \`BASE_SEPOLIA_RPC_URL\`) y redeploy; luego \`ANCHOR_URL=<url> bash e2e/verify-anchor.sh\` debe salir exit 0." || true

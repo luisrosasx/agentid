@@ -57,6 +57,7 @@ contract AgentIdRegistry {
     error ETHTransferFailed();
 
     constructor(address _registrar, address _complianceSigner) {
+        require(_registrar != address(0) && _complianceSigner != address(0), "zero address");
         registrar = _registrar;
         complianceSigner = _complianceSigner;
         _DOMAIN_SEPARATOR = keccak256(

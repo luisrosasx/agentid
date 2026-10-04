@@ -29,7 +29,7 @@ contract BehaviorProof {
     event ReceiptsAnchored(uint256 indexed agentId, bytes32 root, uint64 anchoredAt);
     event DisputeOpened(uint256 indexed agentId, uint256 indexed disputeId, address challenger, bytes32 evidenceRoot);
     event DisputeResolved(uint256 indexed agentId, uint256 indexed disputeId, bool upheld);
-    event Slashed(uint256 indexed agentId, address indexed by, uint64 at);
+    event Slashed(uint256 indexed agentId, address indexed by, uint64 slashedAt);
 
     error NotSlasher();
     error AlreadySlashed();
@@ -37,6 +37,7 @@ contract BehaviorProof {
     error NoReceipt();
 
     constructor(address _slasher) {
+        require(_slasher != address(0), "zero address");
         slasher = _slasher;
     }
 

@@ -1,0 +1,95 @@
+===== AgentIdRegistry
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'solc --version' running
+'solc /work/contracts/contracts/AgentIdRegistry.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,/work/contracts/contracts' running
+INFO:Detectors:
+Detector: missing-zero-check
+AgentIdRegistry.constructor(address,address)._registrar (contracts/AgentIdRegistry.sol#59) lacks a zero-check on :
+AgentIdRegistry.constructor(address,address)._complianceSigner (contracts/AgentIdRegistry.sol#59) lacks a zero-check on :
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Detector: reentrancy-events
+Reentrancy in AgentIdRegistry.burnStake(uint256) (contracts/AgentIdRegistry.sol#134-144):
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+INFO:Detectors:
+Detector: timestamp
+AgentIdRegistry.mint(address,uint256,uint256,bytes) (contracts/AgentIdRegistry.sol#96-128) uses timestamp for comparisons
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in AgentIdRegistry.burnStake(uint256) (contracts/AgentIdRegistry.sol#134-144):
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Detector: naming-convention
+Variable AgentIdRegistry._DOMAIN_SEPARATOR (contracts/AgentIdRegistry.sol#40) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+Detector: constable-states
+AgentIdRegistry.name (contracts/AgentIdRegistry.sol#19) should be constant 
+AgentIdRegistry.symbol (contracts/AgentIdRegistry.sol#20) should be constant 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
+INFO:Slither:/work/contracts/contracts/AgentIdRegistry.sol analyzed (1 contracts with 102 detectors), 8 result(s) found
+===== CertIssuer
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'solc --version' running
+'solc /work/contracts/contracts/CertIssuer.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,/work/contracts/contracts' running
+INFO:Detectors:
+Detector: uninitialized-local
+CertIssuer.issueAttestation(uint256,uint8,bytes32,uint64,bytes[]).recovered (contracts/CertIssuer.sol#69) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+Detector: timestamp
+CertIssuer.issueAttestation(uint256,uint8,bytes32,uint64,bytes[]) (contracts/CertIssuer.sol#56-95) uses timestamp for comparisons
+CertIssuer.isValid(uint256) (contracts/CertIssuer.sol#97-100) uses timestamp for comparisons
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Slither:/work/contracts/contracts/CertIssuer.sol analyzed (1 contracts with 102 detectors), 3 result(s) found
+===== BehaviorProof
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'solc --version' running
+'solc /work/contracts/contracts/BehaviorProof.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,/work/contracts/contracts' running
+Compilation warnings/errors on /work/contracts/contracts/BehaviorProof.sol:
+Warning: "at" will be promoted to keyword in the future and will not be allowed as an identifier anymore.
+32 |     event Slashed(uint256 indexed agentId, address indexed by, uint64 at);
+INFO:Detectors:
+Detector: incorrect-equality
+BehaviorProof.openDispute(uint256,bytes32) (contracts/BehaviorProof.sol#48-56) uses a dangerous strict equality:
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: missing-zero-check
+BehaviorProof.constructor(address)._slasher (contracts/BehaviorProof.sol#39) lacks a zero-check on :
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Detector: timestamp
+BehaviorProof.openDispute(uint256,bytes32) (contracts/BehaviorProof.sol#48-56) uses timestamp for comparisons
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Slither:/work/contracts/contracts/BehaviorProof.sol analyzed (1 contracts with 102 detectors), 3 result(s) found
+===== AgentAccountMinimal
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'solc --version' running
+'solc /work/contracts/contracts/AgentAccountMinimal.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,/work/contracts/contracts' running
+INFO:Detectors:
+Detector: reentrancy-events
+Reentrancy in AgentAccountMinimal.execute(address,uint256) (contracts/AgentAccountMinimal.sol#75-87):
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+INFO:Detectors:
+Detector: timestamp
+AgentAccountMinimal._rollDay(AgentAccountMinimal.Policy) (contracts/AgentAccountMinimal.sol#64-70) uses timestamp for comparisons
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in AgentAccountMinimal.execute(address,uint256) (contracts/AgentAccountMinimal.sol#75-87):
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Detector: immutable-states
+AgentAccountMinimal.owner (contracts/AgentAccountMinimal.sol#18) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+INFO:Slither:/work/contracts/contracts/AgentAccountMinimal.sol analyzed (1 contracts with 102 detectors), 4 result(s) found
+===== BatchVerifier
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'solc --version' running
+'solc /work/contracts/contracts/BatchVerifier.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .,/work/contracts/contracts' running
+INFO:Detectors:
+Detector: calls-loop
+BatchVerifier.verifyBatch(bytes[],bytes32[][],uint256) (contracts/BatchVerifier.sol#25-40) has external calls inside a loop: ! verifier.verify(proofs[i],publicInputs[i]) (contracts/BatchVerifier.sol#33)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+INFO:Slither:/work/contracts/contracts/BatchVerifier.sol analyzed (2 contracts with 102 detectors), 1 result(s) found

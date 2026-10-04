@@ -15,7 +15,7 @@ contract AgentAccountMinimal {
         mapping(address => bool) allowedTargets;
     }
 
-    address public owner;
+    address public immutable owner;
     mapping(address => Policy) private _policies; // owner => policy (una cuenta por owner)
 
     event DailyLimitSet(address indexed owner, uint256 limitWei);
