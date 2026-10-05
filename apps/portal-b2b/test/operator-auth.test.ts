@@ -31,8 +31,36 @@ test('AUTH_MODE=off keeps the portal open exactly as today', async () => {
       const api = await app.inject({ method: 'GET', url: '/api/fleet' });
       assert.equal(api.statusCode, 200);
       const fleet = api.json();
+      // Fase 10B: sin datos live la flota queda vacía incluso con AUTH_MODE=off.
+      assert.deepEqual(fleet.identities, []);
+    } finally {
+      await app.close();
+    }
+  });
+});
+
+test('PORTAL_DEMO_MODE=true enables sample data explicitly', async () => {
+  await withEnv({ AUTH_MODE: 'off', PORTAL_DEMO_MODE: 'true', POB_URL: 'http://127.0.0.1:1' }, async () => {
+    const app = await buildApp();
+    try {
+      const api = await app.inject({ method: 'GET', url: '/api/fleet' });
+      assert.equal(api.statusCode, 200);
+      const fleet = api.json();
       assert.ok(fleet.identities.length > 0);
       assert.ok(fleet.identities.every((i: { source: string }) => i.source === 'sample'));
+    } finally {
+      await app.close();
+    }
+  });
+});
+
+test('PORTAL_DATA_SOURCE=live wins over PORTAL_DEMO_MODE=true', async () => {
+  await withEnv({ AUTH_MODE: 'off', PORTAL_DATA_SOURCE: 'live', PORTAL_DEMO_MODE: 'true' }, async () => {
+    const app = await buildApp();
+    try {
+      const api = await app.inject({ method: 'GET', url: '/api/fleet' });
+      assert.equal(api.statusCode, 200);
+      assert.deepEqual(api.json(), { identities: [] });
     } finally {
       await app.close();
     }

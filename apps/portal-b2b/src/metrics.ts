@@ -8,7 +8,13 @@ export interface MetricsOptions {
 
 const LATENCY_WINDOW = 1000;
 
-export function registerMetrics(app: FastifyInstance, opts: MetricsOptions): void {
+export interface MetricsSnapshot {
+  requestsTotal: () => number;
+  p99Ms: () => number;
+  uptimeS: () => number;
+}
+
+export function registerMetrics(app: FastifyInstance, opts: MetricsOptions): MetricsSnapshot {
   const startedAt = Date.now();
   let requestsTotal = 0;
   const latencies: number[] = [];
@@ -46,4 +52,10 @@ export function registerMetrics(app: FastifyInstance, opts: MetricsOptions): voi
       ...(opts.extra ? opts.extra() : {}),
     };
   });
+
+  return {
+    requestsTotal: () => requestsTotal,
+    p99Ms: p99Ms,
+    uptimeS: () => Math.round((Date.now() - startedAt) / 1000),
+  };
 }

@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { loadFleet, renderHtml, renderLandingHtml, type DataSource } from './portal.js';
 import { registerMetrics } from './metrics.js';
+import { computeKpis, renderKpisHtml } from './kpis.js';
 import { applyRateLimit, applyServiceAuth } from './auth.js';
 import formbody from '@fastify/formbody';
 import { applyOperatorAuth, OPERATOR_PUBLIC_ROUTES } from './operator.js';
@@ -8,15 +9,16 @@ import { applyOperatorAuth, OPERATOR_PUBLIC_ROUTES } from './operator.js';
 const SERVICE = 'portal-b2b';
 
 /**
- * Fuente de datos en producción (Fase 6, tarea 6.5): PORTAL_DATA_SOURCE con
- * default fail-closed 'live'. Con AUTH_MODE=off se mantiene el comportamiento
- * histórico (fallback a datos demo) para no romper la app tal como existe hoy.
+ * Fuente de datos (Fase 6, tarea 6.5; Fase 10B). Default fail-closed 'live':
+ * sin datos live el portal muestra la flota vacía, nunca datos demo. Los
+ * datos demo quedan detrás de un flag explícito: PORTAL_DEMO_MODE=true o
+ * PORTAL_DATA_SOURCE=sample.
  */
 export function resolveDataSource(): DataSource {
   const raw = (process.env.PORTAL_DATA_SOURCE ?? '').toLowerCase();
   if (raw === 'live' || raw === 'sample') return raw;
-  const authMode = (process.env.AUTH_MODE ?? 'off').toLowerCase();
-  return authMode === 'off' ? 'sample' : 'live';
+  const demoMode = (process.env.PORTAL_DEMO_MODE ?? '').toLowerCase();
+  return demoMode === 'true' || demoMode === '1' ? 'sample' : 'live';
 }
 
 export interface BuildAppOptions {
@@ -27,11 +29,11 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
   const app = Fastify({ logger: opts.logger ?? false, trustProxy: true });
   const counters = { fleet_queries: 0 };
   await app.register(formbody);
-  registerMetrics(app, { service: SERVICE, business: counters });
+  const metrics = registerMetrics(app, { service: SERVICE, business: counters });
   await applyRateLimit(app);
   // Con AUTH_MODE≠off, las rutas de navegador quedan cubiertas por la sesión
   // de operador (tarea 6.5), no por X-Service-Key (tarea 6.4).
-  applyServiceAuth(app, { extraPublicRoutes: OPERATOR_PUBLIC_ROUTES.concat(['/api/fleet', '/fleet']) });
+  applyServiceAuth(app, { extraPublicRoutes: OPERATOR_PUBLIC_ROUTES.concat(['/api/fleet', '/fleet', '/api/kpis', '/kpis']) });
   applyOperatorAuth(app);
 
   // Error handler genérico: nada de stack traces ni IDs internos.
@@ -60,6 +62,34 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
     return renderHtml(identities);
   });
 
+  // KPIs (Fase 10B): dashboard único del blueprint 06 §6 + señales del día 90
+  // del blueprint 04. Protegidos por sesión de operador igual que /fleet.
+  app.get('/api/kpis', async () => {
+    const identities = await loadFleet(process.env['POB_URL'], process.env['RESOLVER_URL'], resolveDataSource());
+    return computeKpis({
+      fleet: identities,
+      requestsTotal: metrics.requestsTotal(),
+      fleetQueries: counters.fleet_queries,
+      p99Ms: metrics.p99Ms(),
+      uptimeS: metrics.uptimeS(),
+      ...kpiEnv(),
+    });
+  });
+
+  app.get('/kpis', async (_req, reply) => {
+    const identities = await loadFleet(process.env['POB_URL'], process.env['RESOLVER_URL'], resolveDataSource());
+    const dashboard = computeKpis({
+      fleet: identities,
+      requestsTotal: metrics.requestsTotal(),
+      fleetQueries: counters.fleet_queries,
+      p99Ms: metrics.p99Ms(),
+      uptimeS: metrics.uptimeS(),
+      ...kpiEnv(),
+    });
+    reply.type('text/html; charset=utf-8');
+    return renderKpisHtml(dashboard);
+  });
+
   app.get('/', async (_req, reply) => {
     const authMode = (process.env.AUTH_MODE ?? 'off').toLowerCase();
     if (authMode !== 'off') {
@@ -74,6 +104,24 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<FastifyInsta
   });
 
   return app;
+}
+
+/** Integrales externas opcionales (emisor, interchange, facturación) vía env. */
+function kpiEnv(): Record<string, number | undefined> {
+  const num = (name: string): number | undefined => {
+    const raw = process.env[name];
+    if (raw === undefined || raw.trim() === '') return undefined;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : undefined;
+  };
+  return {
+    certEnforcingServices: num('KPI_CERT_ENFORCING_SERVICES'),
+    attestationsPerDay: num('KPI_ATTESTATIONS_PER_DAY'),
+    renewalRatePct: num('KPI_RENEWAL_RATE_PCT'),
+    receiptCoveragePct: num('KPI_RECEIPT_COVERAGE_PCT'),
+    payingFleets: num('KPI_PAYING_FLEETS'),
+    arrUsd: num('KPI_ARR_USD'),
+  };
 }
 
 async function main(): Promise<void> {

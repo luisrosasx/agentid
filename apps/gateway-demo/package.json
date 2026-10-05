@@ -5,10 +5,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "cross-env NODE_ENV=test tsx --test test/*.test.ts",
-    "start": "tsx src/main.ts"
+    "start": "tsx src/main.ts",
+    "kit:onboard": "tsx kit/onboard.ts"
   },
   "dependencies": {
     "@agentid/sdk-auth": "workspace:*",
+    "@agentid/sdk-receipts": "workspace:*",
     "@fastify/rate-limit": "^10.1.1",
     "ethers": "^6.13.4",
     "fastify": "^5.12.5",

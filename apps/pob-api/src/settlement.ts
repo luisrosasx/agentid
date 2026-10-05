@@ -61,17 +61,28 @@ export function settlementLeaf(rec: Omit<SettlementRecord, 'batchRoot'>): string
   );
 }
 
+function hashPair(a: string, b: string): string {
+  // Pares ordenados lexicográficamente, igual que MerkleProof de OpenZeppelin
+  // on-chain (InterchangeSettlement.claim usa MerkleProof.verify).
+  const [lo, hi] = a <= b ? [a, b] : [b, a];
+  return keccak256(Buffer.concat([Buffer.from(lo.slice(2), 'hex'), Buffer.from(hi.slice(2), 'hex')]));
+}
+
+function merkleLevel(leaves: string[]): string[] {
+  const next: string[] = [];
+  for (let i = 0; i < leaves.length; i += 2) {
+    const a = leaves[i];
+    const b = leaves[i + 1] ?? a; // nodo impar: se duplica, estándar OZ
+    next.push(hashPair(a, b));
+  }
+  return next;
+}
+
 function merkleRoot(leaves: string[]): string {
   if (leaves.length === 0) return keccak256(toUtf8Bytes('empty'));
   let level = [...leaves].sort();
   while (level.length > 1) {
-    const next: string[] = [];
-    for (let i = 0; i < level.length; i += 2) {
-      const a = level[i];
-      const b = level[i + 1] ?? a;
-      next.push(keccak256(Buffer.concat([Buffer.from(a.slice(2), 'hex'), Buffer.from(b.slice(2), 'hex')])));
-    }
-    level = next;
+    level = merkleLevel(level);
   }
   return level[0];
 }
@@ -79,4 +90,24 @@ function merkleRoot(leaves: string[]): string {
 /** Merkle root (pares ordenados, estándar OpenZeppelin) de los settlements del día. */
 export function batchRootForDay(records: Omit<SettlementRecord, 'batchRoot'>[]): string {
   return merkleRoot(records.map(settlementLeaf));
+}
+
+/**
+ * Merkle proof (índice i) compatible con MerkleProof.verify de OpenZeppelin.
+ * Para un nodo sin hermano en el último nivel, el proof contiene el propio nodo
+ * duplicado (convención estándar de OZ).
+ */
+export function merkleProofForIndex(leaves: string[], index: number): string[] {
+  if (leaves.length === 0 || index < 0 || index >= leaves.length) throw new Error('index out of range');
+  let level = [...leaves].sort();
+  let idx = level.indexOf(leaves[index]);
+  if (idx === -1) throw new Error('leaf not found');
+  const proof: string[] = [];
+  while (level.length > 1) {
+    const siblingIdx = idx % 2 === 0 ? idx + 1 : idx - 1;
+    proof.push(level[siblingIdx] ?? level[idx]);
+    level = merkleLevel(level);
+    idx = Math.floor(idx / 2);
+  }
+  return proof;
 }

@@ -156,6 +156,9 @@ importers:
       '@agentid/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
+      '@agentid/sdk-receipts':
+        specifier: workspace:*
+        version: link:../../packages/sdk-receipts
       '@fastify/rate-limit':
         specifier: ^10.1.1
         version: 10.3.0
@@ -171,6 +174,34 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
+        version: 22.20.5
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      typescript:
+        specifier: ^5.6.0
+        version: 5.9.3
+
+  apps/interchange:
+    dependencies:
+      '@agentid/sdk-auth':
+        specifier: workspace:*
+        version: link:../../packages/sdk-auth
+      '@fastify/rate-limit':
+        specifier: ^10.1.1
+        version: 10.3.0
+      ethers:
+        specifier: ^6.13.4
+        version: 6.17.0
+      fastify:
+        specifier: ^5.12.5
+        version: 5.12.5
+      tsx:
+        specifier: ^4.19.2
+        version: 4.23.15
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
         version: 22.20.5
       cross-env:
         specifier: ^7.0.3
@@ -307,6 +338,13 @@ importers:
         version: 5.9.3
 
   contracts:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: ^5.1.0
+        version: 5.6.1
+      '@openzeppelin/contracts-upgradeable':
+        specifier: ^5.1.0
+        version: 5.6.1(@openzeppelin/contracts@5.6.1)
     devDependencies:
       '@nomicfoundation/hardhat-toolbox':
         specifier: ^5.0.0
@@ -927,6 +965,14 @@ packages:
   '@nomicfoundation/solidity-analyzer@0.1.2':
     resolution: {integrity: sha512-q4n32/FNKIhQ3zQGGw5CvPF6GTvDCpYwIf7bEY/dZTZbgfDsHyjJwURxUJf3VQuuJj+fDIFl4+KkBVbw4Ef6jA==}
     engines: {node: '>= 12'}
+
+  '@openzeppelin/contracts-upgradeable@5.6.1':
+    resolution: {integrity: sha512-n4a/vfRs114lXyUdYg7pyY8LvFKWvCDF5lEcRRAVxap8g6ZEdLqm+9tmt2zTtRHcNMxTYp9y5t6KBof4tHp7Og==}
+    peerDependencies:
+      '@openzeppelin/contracts': 5.6.1
+
+  '@openzeppelin/contracts@5.6.1':
+    resolution: {integrity: sha512-Ly6SlsVJ3mj+b18W3R8gNufB7dTICT105fJhodGAGgyC2oqnBAhqSiNDJ8V8DLY05cCz81GLI0CU5vNYA1EC/w==}
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
@@ -3664,6 +3710,12 @@ snapshots:
       '@nomicfoundation/solidity-analyzer-linux-x64-gnu': 0.1.2
       '@nomicfoundation/solidity-analyzer-linux-x64-musl': 0.1.2
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.2
+
+  '@openzeppelin/contracts-upgradeable@5.6.1(@openzeppelin/contracts@5.6.1)':
+    dependencies:
+      '@openzeppelin/contracts': 5.6.1
+
+  '@openzeppelin/contracts@5.6.1': {}
 
   '@pinojs/redact@0.4.0': {}
 

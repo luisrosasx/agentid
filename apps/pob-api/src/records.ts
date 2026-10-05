@@ -9,7 +9,22 @@ export interface SlashRecord {
   slashedAt: string;
 }
 
+export interface ZkAttestRecord {
+  agentId: string;
+  root: string;
+  minK: number;
+  minWeight: number;
+  validAttestations: number;
+  attestationHash: string;
+  recordedAt: string;
+}
+
+export const ZK_ATTEST_TTL_MS = 24 * 60 * 60 * 1000;
+
 export interface RecordsStore {
+  insertZkAttestation(r: ZkAttestRecord): Promise<void>;
+  listZkAttestations(agentId: string): Promise<ZkAttestRecord[]>;
+  hasValidZkAttestation(agentId: string, ttlMs?: number): Promise<boolean>;
   mode: 'postgres' | 'memory';
   insertContradiction(c: Contradiction): Promise<void>;
   getContradiction(evidenceHash: string): Promise<Contradiction | null>;
@@ -25,6 +40,24 @@ export class MemoryRecordsStore implements RecordsStore {
   private contradictions = new Map<string, Contradiction>();
   private slashes = new Map<string, SlashRecord[]>();
   private settlements = new Map<string, SettlementRecord[]>();
+  private zkAttests = new Map<string, ZkAttestRecord[]>();
+
+  async insertZkAttestation(r: ZkAttestRecord): Promise<void> {
+    const list = this.zkAttests.get(r.agentId) ?? [];
+    list.push(r);
+    this.zkAttests.set(r.agentId, list);
+  }
+
+  async listZkAttestations(agentId: string): Promise<ZkAttestRecord[]> {
+    return [...(this.zkAttests.get(agentId) ?? [])];
+  }
+
+  async hasValidZkAttestation(agentId: string, ttlMs: number = ZK_ATTEST_TTL_MS): Promise<boolean> {
+    const now = Date.now();
+    return (this.zkAttests.get(agentId) ?? []).some(
+      (r) => now - Date.parse(r.recordedAt) < ttlMs,
+    );
+  }
 
   async insertContradiction(c: Contradiction): Promise<void> {
     this.contradictions.set(c.evidenceHash, c);
@@ -112,6 +145,39 @@ export class PgRecordsStore implements RecordsStore {
     return res.rowCount !== null && res.rowCount > 0;
   }
 
+  async insertZkAttestation(r: ZkAttestRecord): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO zk_attest_log (agent_id, root, min_k, min_weight, valid_attestations, attestation_hash, recorded_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [r.agentId, r.root, r.minK, r.minWeight, r.validAttestations, r.attestationHash, r.recordedAt],
+    );
+  }
+
+  async listZkAttestations(agentId: string): Promise<ZkAttestRecord[]> {
+    const res = await this.pool.query(
+      `SELECT agent_id, root, min_k, min_weight, valid_attestations, attestation_hash, recorded_at
+       FROM zk_attest_log WHERE agent_id = $1 ORDER BY recorded_at`,
+      [agentId],
+    );
+    return res.rows.map((row) => ({
+      agentId: row['agent_id'] as string,
+      root: row['root'] as string,
+      minK: row['min_k'] as number,
+      minWeight: row['min_weight'] as number,
+      validAttestations: row['valid_attestations'] as number,
+      attestationHash: row['attestation_hash'] as string,
+      recordedAt: new Date(row['recorded_at']).toISOString(),
+    }));
+  }
+
+  async hasValidZkAttestation(agentId: string, ttlMs: number = ZK_ATTEST_TTL_MS): Promise<boolean> {
+    const res = await this.pool.query(
+      `SELECT 1 FROM zk_attest_log WHERE agent_id = $1 AND recorded_at > now() - ($2 || ' milliseconds')::interval LIMIT 1`,
+      [agentId, String(ttlMs)],
+    );
+    return res.rowCount !== null && res.rowCount > 0;
+  }
+
   async insertSettlement(s: SettlementRecord): Promise<void> {
     await this.pool.query(
       `INSERT INTO settlement_log (gateway_id, tier, volume_wei, gateway_bps, agentid_bps, gateway_amount_wei, agentid_amount_wei, batch_root, day, settled_at)
@@ -184,4 +250,15 @@ CREATE TABLE IF NOT EXISTS settlement_log (
   batch_root TEXT NOT NULL,
   day DATE NOT NULL,
   settled_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS zk_attest_log (
+  id BIGSERIAL PRIMARY KEY,
+  agent_id TEXT NOT NULL,
+  root TEXT NOT NULL,
+  min_k INT NOT NULL,
+  min_weight INT NOT NULL,
+  valid_attestations INT NOT NULL,
+  attestation_hash TEXT NOT NULL,
+  recorded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 )`;
+

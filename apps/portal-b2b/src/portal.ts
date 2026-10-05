@@ -12,6 +12,7 @@ export const PRICE_BOOK = [
   { tier: 'Enterprise', agents: null, priceUsd: 180, note: 'agentes ilimitados, ancla año 2 $180, SLA' },
 ] as const;
 
+/** Datos demo: solo visibles con PORTAL_DEMO_MODE=true o DATA_SOURCE=sample. */
 const SAMPLE_FLEET: FleetIdentity[] = [
   { agentId: 'agent-demo-001', source: 'sample', score: 62, status: 'active' },
   { agentId: 'agent-demo-002', source: 'sample', score: 41, status: 'active' },
@@ -19,10 +20,10 @@ const SAMPLE_FLEET: FleetIdentity[] = [
 ];
 
 /**
- * Fuente de datos (Fase 6, tarea 6.5). El default a nivel de función es
- * 'sample' (comportamiento histórico, usado con AUTH_MODE=off y en tests);
- * en producción el servidor resuelve PORTAL_DATA_SOURCE con default
- * fail-closed 'live': si pob-api/credit no responde, no hay datos demo.
+ * Fuente de datos (Fase 6, tarea 6.5; Fase 10B). El default es 'live'
+ * (fail-closed): sin backends accesibles la flota queda vacía, nunca se
+ * muestran datos de ejemplo. Los datos demo (SAMPLE_FLEET) solo aparecen con
+ * PORTAL_DEMO_MODE=true o PORTAL_DATA_SOURCE=sample explícitos.
  */
 export type DataSource = 'live' | 'sample';
 
@@ -63,7 +64,7 @@ function normalizeIdentities(raw: unknown, source: 'pob' | 'resolver'): FleetIde
 export async function loadFleet(
   pobUrl: string | undefined,
   resolverUrl: string | undefined,
-  dataSource: DataSource = 'sample',
+  dataSource: DataSource = 'live',
 ): Promise<FleetIdentity[]> {
   const fromPob = pobUrl
     ? normalizeIdentities(await fetchJson(`${pobUrl.replace(/\/$/, '')}/fleet`), 'pob')

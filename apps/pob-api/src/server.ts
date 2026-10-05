@@ -5,6 +5,8 @@ import { analyzeCollusion } from './collusion.js';
 import { batchRootForDay, splitInterchange, type SettlementRecord } from './settlement.js';
 import { openReceiptStore, RECEIPTS_TABLE_DDL, type ReceiptStore } from './store.js';
 import { openRecordsStore, RECORDS_TABLE_DDL, type RecordsStore } from './records.js';
+import { verifyZkAttestation, type MerklePath } from './zk.js';
+import { keccak256, toUtf8Bytes } from 'ethers';
 import { registerMetrics } from './metrics.js';
 import { applyRateLimit, applyServiceAuth } from './auth.js';
 
@@ -25,7 +27,7 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
     await pool.query(RECORDS_TABLE_DDL);
   }
   const records = deps?.records ?? openRecordsStore(pool);
-  const counters = { receipts: 0, scores: 0, crossAttests: 0, settles: 0, slashes: 0 };
+  const counters = { receipts: 0, scores: 0, crossAttests: 0, zkAttests: 0, settles: 0, slashes: 0 };
 
   const app = Fastify({ logger: false, trustProxy: true });
   const signerAddress = new (await import('ethers')).Wallet(process.env['POB_KEY'] ?? ephemeralKey()).address;
@@ -33,7 +35,7 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
   await applyRateLimit(app);
   applyServiceAuth(app);
 
-  app.get('/healthz', async () => ({ ok: true, service: SERVICE, store: receipts.mode }));
+  app.get('/healthz', async () => ({ ok: true, service: SERVICE, store: receipts.mode, zkRequired: process.env['POB_REQUIRE_ZK'] === 'true' }));
 
   app.post<{ Body: { receipt?: unknown; signature?: unknown } }>('/receipt', async (req, reply) => {
     const { receipt, signature } = req.body ?? {};
@@ -90,6 +92,12 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
     if (typeof agentId !== 'string' || agentId.length === 0) {
       return reply.code(400).send({ error: 'agentId is required' });
     }
+    if (process.env['POB_REQUIRE_ZK'] === 'true' && !(await records.hasValidZkAttestation(agentId))) {
+      return reply.code(409).send({
+        error: 'zk-required',
+        hint: 'submit a valid POST /zk-attest first: a non-expired zk_attest_log entry for this agentId is required',
+      });
+    }
     const agentReceipts = await receipts.listByAgent(agentId);
     const counterpartyReceipts = (await receipts.listAll()).filter((r) => r.agentId !== agentId);
     const report = crossAttest(agentReceipts, counterpartyReceipts);
@@ -97,6 +105,100 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
     counters.crossAttests += 1;
     return { agentId, contradictions: report.contradictions, verdict: report.verdict };
   });
+
+  // EP-19 / Fase 8 — Atestación ZK (privacidad: las contrapartes no se persisten en claro)
+  interface ZkCounterpartyBody {
+    address?: unknown;
+    merklePath?: unknown;
+    weak?: unknown;
+    weight?: unknown;
+  }
+  app.post<{ Body: { agentId?: unknown; root?: unknown; minK?: unknown; minWeight?: unknown; counterparties?: ZkCounterpartyBody[] } }>(
+    '/zk-attest',
+    async (req, reply) => {
+      const { agentId, root, minK, minWeight, counterparties } = req.body ?? {};
+      if (typeof agentId !== 'string' || agentId.length === 0) {
+        return reply.code(400).send({ error: 'agentId is required' });
+      }
+      if (typeof root !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(root)) {
+        return reply.code(400).send({ error: 'root must be a 32-byte hex string' });
+      }
+      if (typeof minK !== 'number' || !Number.isInteger(minK) || minK < 1) {
+        return reply.code(400).send({ error: 'minK must be a positive integer' });
+      }
+      const minWeightNum = minWeight === undefined ? 0 : minWeight;
+      if (typeof minWeightNum !== 'number' || !Number.isInteger(minWeightNum) || minWeightNum < 0) {
+        return reply.code(400).send({ error: 'minWeight must be a non-negative integer' });
+      }
+      if (!Array.isArray(counterparties) || counterparties.length === 0) {
+        return reply.code(400).send({ error: 'counterparties must be a non-empty array' });
+      }
+      const identities: Uint8Array[] = [];
+      const paths: MerklePath[] = [];
+      const weak: boolean[] = [];
+      const weights: number[] = [];
+      for (let i = 0; i < counterparties.length; i++) {
+        const c = counterparties[i];
+        if (typeof c?.address !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(c.address)) {
+          return reply.code(400).send({ error: `counterparties[${i}].address must be a 20-byte hex string` });
+        }
+        const mp = c.merklePath as { siblings?: unknown; selectors?: unknown } | undefined;
+        if (
+          !mp ||
+          !Array.isArray(mp.siblings) ||
+          !mp.siblings.every((s) => typeof s === 'string' && /^0x[0-9a-fA-F]{64}$/.test(s)) ||
+          !Array.isArray(mp.selectors) ||
+          mp.selectors.length !== mp.siblings.length ||
+          !mp.selectors.every((s) => typeof s === 'boolean')
+        ) {
+          return reply.code(400).send({ error: `counterparties[${i}].merklePath must be { siblings: hex32[], selectors: boolean[] } of equal length` });
+        }
+        if (typeof c.weak !== 'boolean') {
+          return reply.code(400).send({ error: `counterparties[${i}].weak must be a boolean` });
+        }
+        const w = c.weight === undefined ? 100 : c.weight;
+        if (typeof w !== 'number' || !Number.isInteger(w) || w < 0) {
+          return reply.code(400).send({ error: `counterparties[${i}].weight must be a non-negative integer` });
+        }
+        identities.push(new Uint8Array(Buffer.from(c.address.slice(2), 'hex')));
+        paths.push({
+          siblings: (mp.siblings as string[]).map((s) => new Uint8Array(Buffer.from(s.slice(2), 'hex'))),
+          selectors: mp.selectors as boolean[],
+        });
+        weak.push(c.weak);
+        weights.push(w);
+      }
+      const result = verifyZkAttestation({
+        root: new Uint8Array(Buffer.from(root.slice(2), 'hex')),
+        identities,
+        paths,
+        weak,
+        weights,
+        minK,
+        minWeight: minWeightNum,
+      });
+      if (!result.ok) {
+        return reply.code(400).send({ error: 'zk-attestation invalid', reason: result.reason });
+      }
+      const attestationHash = keccak256(
+        toUtf8Bytes(
+          JSON.stringify({ agentId, root, minK, minWeight: minWeightNum, validAttestations: identities.length, weak }),
+        ),
+      );
+      const record = {
+        agentId,
+        root,
+        minK,
+        minWeight: minWeightNum,
+        validAttestations: identities.length,
+        attestationHash,
+        recordedAt: new Date().toISOString(),
+      };
+      await records.insertZkAttestation(record);
+      counters.zkAttests += 1;
+      return reply.code(201).send({ accepted: true, attestationHash, root, validAttestations: identities.length });
+    },
+  );
 
   // EP-21 — Anti-colusión
   app.get<{ Params: { agentId: string } }>('/colusion/:agentId', async (req, reply) => {
@@ -150,6 +252,17 @@ export async function buildApp(deps?: Partial<AppDeps>): Promise<FastifyInstance
       agentidAmountWei: split.agentidAmountWei,
       batchRoot,
     };
+  });
+
+  // EP-25/Fase 10A — listado read-only de settlements por día (para el batcher
+  // de apps/interchange).
+  app.get<{ Params: { day: string } }>('/settlements/:day', async (req, reply) => {
+    const day = req.params.day;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+      return reply.code(400).send({ error: 'day must be YYYY-MM-DD' });
+    }
+    const list = await records.listSettlementsByDay(day);
+    return { day, batchRoot: batchRootForDay(list), settlements: list };
   });
 
   // EP-28 — Slashing determinístico
