@@ -51,7 +51,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue create -R luisrosasx/agentid \
+          gh issue create -R luisrosasx/cardca \
             --title "e2e-nightly FAIL $(date -u +%F)" \
             --body "El job e2e-nightly falló. Ver logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
 

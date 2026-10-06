@@ -5,7 +5,7 @@
 ## Requisitos
 
 - Node 22, pnpm 9.15.9, (opcional) Docker para la toolchain ZK.
-- Repo: `luisrosasx/agentid` (main). `git clone && pnpm install --frozen-lockfile`.
+- Repo: `luisrosasx/cardca` (main). `git clone && pnpm install --frozen-lockfile`.
 
 ## Suite de contratos (alcance principal)
 
