@@ -1,4 +1,4 @@
-import type { AttestationMessage } from '@agentid/schemas';
+import type { AttestationMessage } from '@cardca/schemas';
 import type { CacheEntry } from './cache.js';
 
 export interface ResolverEntry {

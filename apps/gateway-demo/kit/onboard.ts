@@ -8,7 +8,7 @@
  *   1. healthcheck          GET  /healthz
  *   2. service key          POST /enforce con X-Service-Key (allow)
  *   3. decisión deny        POST /enforce (agente sin attestation → 403)
- *   4. firma HMAC           firma de petición según @agentid/sdk-auth
+ *   4. firma HMAC           firma de petición según @cardca/sdk-auth
  *   5. recibo bilateral     firma + verificación (packages/sdk-receipts)
  *   6. estado/métricas      GET /metrics
  *
@@ -22,9 +22,9 @@ process.env.NODE_ENV = 'test';
 const { createApp } = await import('../src/main.ts');
 const { GatewayEnforcer } = await import('../src/sdk/index.js');
 import { randomBytes, Wallet } from 'ethers';
-import { computeHmacSignature, sha256Hex } from '@agentid/sdk-auth';
-import { signReceipt, verifyReceipt, receiptDigest, merkleRoot } from '@agentid/sdk-receipts';
-import type { BilateralReceiptMessage } from '@agentid/sdk-receipts';
+import { computeHmacSignature, sha256Hex } from '@cardca/sdk-auth';
+import { signReceipt, verifyReceipt, receiptDigest, merkleRoot } from '@cardca/sdk-receipts';
+import type { BilateralReceiptMessage } from '@cardca/sdk-receipts';
 
 const AGENT = 'agent:kit-demo';
 const TARGET = '0x' + '1'.repeat(40);
@@ -43,7 +43,7 @@ function stubFetch(): typeof fetch {
   };
   const creditOk = { dailyLimitWei: LIMIT };
   const attestationPromise = issuer.signTypedData(
-    { name: 'AGENT.ID', version: '1', chainId: 31337 },
+    { name: 'CardCA', version: '1', chainId: 31337 },
     {
       Attestation: [
         { name: 'agentId', type: 'string' },
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
   const deniedBody = (await denied.json()) as { decision?: string };
   step('3. enforce fail-closed (deny)', denied.status === 403 && deniedBody.decision === 'deny', `POST /enforce (agente desconocido) → ${denied.status} decision=${deniedBody.decision}`);
 
-  // Paso 4: firma HMAC (esquema de @agentid/sdk-auth, listo para endpoints
+  // Paso 4: firma HMAC (esquema de @cardca/sdk-auth, listo para endpoints
   // que apliquen requireHmac; el demo de enforcement usa service key).
   const body = JSON.stringify({ agentId: AGENT, target: TARGET, amountWei: '1000' });
   const secret = `hmac-${randomBytes(16).toString('hex')}`;

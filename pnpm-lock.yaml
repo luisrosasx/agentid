@@ -17,10 +17,10 @@ importers:
 
   apps/anchor:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
-      '@agentid/sdk-receipts':
+      '@cardca/sdk-receipts':
         specifier: workspace:*
         version: link:../../packages/sdk-receipts
       '@fastify/rate-limit':
@@ -54,7 +54,7 @@ importers:
 
   apps/challenges:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -85,7 +85,7 @@ importers:
 
   apps/compliance:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -119,7 +119,7 @@ importers:
 
   apps/credit:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -153,10 +153,10 @@ importers:
 
   apps/gateway-demo:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
-      '@agentid/sdk-receipts':
+      '@cardca/sdk-receipts':
         specifier: workspace:*
         version: link:../../packages/sdk-receipts
       '@fastify/rate-limit':
@@ -184,7 +184,7 @@ importers:
 
   apps/interchange:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -212,7 +212,7 @@ importers:
 
   apps/issuer:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -246,7 +246,7 @@ importers:
 
   apps/pob-api:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -280,7 +280,7 @@ importers:
 
   apps/portal-b2b:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/formbody':
@@ -308,7 +308,7 @@ importers:
 
   apps/resolver:
     dependencies:
-      '@agentid/sdk-auth':
+      '@cardca/sdk-auth':
         specifier: workspace:*
         version: link:../../packages/sdk-auth
       '@fastify/rate-limit':
@@ -370,7 +370,7 @@ importers:
 
   packages/sdk-account:
     dependencies:
-      '@agentid/schemas':
+      '@cardca/schemas':
         specifier: workspace:*
         version: link:../schemas
       ethers:
@@ -408,10 +408,10 @@ importers:
 
   packages/sdk-gateway:
     dependencies:
-      '@agentid/schemas':
+      '@cardca/schemas':
         specifier: workspace:*
         version: link:../schemas
-      '@agentid/sdk-verifier':
+      '@cardca/sdk-verifier':
         specifier: workspace:*
         version: link:../sdk-verifier
       ethers:
@@ -430,7 +430,7 @@ importers:
 
   packages/sdk-receipts:
     dependencies:
-      '@agentid/schemas':
+      '@cardca/schemas':
         specifier: workspace:*
         version: link:../schemas
       ethers:
@@ -449,7 +449,7 @@ importers:
 
   packages/sdk-verifier:
     dependencies:
-      '@agentid/schemas':
+      '@cardca/schemas':
         specifier: workspace:*
         version: link:../schemas
       ethers:

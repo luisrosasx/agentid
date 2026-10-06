@@ -1,11 +1,11 @@
-# Charter del Consorcio AGENT.ID (borrador v0.1)
+# Charter del Consorcio CardCA (borrador v0.1)
 
 > Fase 9.4 · **borrador** — el acta firmada es el gate humano (EP-29); este doc es la base de negociación
 
 ## 1. Propósito
 
-Gestionar la **spec v1 de AGENT.ID** como estándar abierto del "internet agentil":
-identidad agéntica verificable (AGENT.CERT), conducta probada (Proof-of-Behavior) y
+Gestionar la **spec v1 de CardCA** como estándar abierto del "internet agentil":
+identidad agéntica verificable (Agent Card), conducta probada (Proof-of-Behavior) y
 cuentas con límites (Cuenta Agentil), interoperable con el Protocolo A2A.
 
 ## 2. Miembros y roles
@@ -34,7 +34,7 @@ cuentas con límites (Cuenta Agentil), interoperable con el Protocolo A2A.
 
 - Spec y RFCs: **CC BY 4.0** (atribución, cambios documentados).
 - Código de referencia (monorepo): **Apache-2.0** (alineado con los headers SPDX ya presentes).
-- Marca AGENT.ID/AGENT.CERT: del steward; uso libre para implementaciones conformes.
+- Marca CardCA / Agent Card: del steward; uso libre para implementaciones conformes.
 
 ## 5. Admisión y salida
 

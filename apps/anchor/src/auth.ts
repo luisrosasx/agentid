@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
-import { requireServiceAuth } from '@agentid/sdk-auth';
+import { requireServiceAuth } from '@cardca/sdk-auth';
 
 /**
  * Rate limiting + auth (Fase 6, tareas 6.3/6.4).
@@ -11,7 +11,7 @@ import { requireServiceAuth } from '@agentid/sdk-auth';
  *   `config.rateLimit` (p. ej. KYC en compliance).
  * - Auth: con AUTH_MODE=off (default) todo pasa y se añade la cabecera de
  *   debug `X-Auth-Mode: off`. Con AUTH_MODE≠off, toda ruta no pública pasa por
- *   `requireServiceAuth` de @agentid/sdk-auth (401 si no hay credencial).
+ *   `requireServiceAuth` de @cardca/sdk-auth (401 si no hay credencial).
  */
 
 export const PUBLIC_ROUTES: string[] = ['/healthz', '/metrics'];

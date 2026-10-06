@@ -4,7 +4,7 @@
 //   hoja = keccak256(addr 20 bytes); nodo = keccak256(izq ++ der); SLOTS hojas
 //   (padding = keccak256(0x00…00)). Genera paths + selectors por slot activo.
 //
-// Uso (desde agentid/): node zk/tools/gen-witness.mjs [--slots 32] [--out <ruta Prover.toml>]
+// Uso (desde cardca/): node zk/tools/gen-witness.mjs [--slots 32] [--out <ruta Prover.toml>]
 
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';

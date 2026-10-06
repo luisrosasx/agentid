@@ -59,7 +59,7 @@ async function makeResolverBody(nowSec: number, ttlSec: number, wallet = issuer)
     expiresAt: (nowSec + ttlSec) * 1000,
   };
   const signature = await wallet.signTypedData(
-    { name: 'AGENT.ID', version: '1', chainId: 31337 },
+    { name: 'CardCA', version: '1', chainId: 31337 },
     {
       Attestation: [
         { name: 'agentId', type: 'string' },

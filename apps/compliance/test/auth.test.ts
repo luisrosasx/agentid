@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Wallet } from 'ethers';
-import { computeHmacSignature, OPERATOR_DOMAIN, OPERATOR_TYPES, sha256Hex } from '@agentid/sdk-auth';
+import { computeHmacSignature, OPERATOR_DOMAIN, OPERATOR_TYPES, sha256Hex } from '@cardca/sdk-auth';
 
 const SERVICE_KEY = 'test-service-key';
 const HMAC_SECRET = 'hmac-secret-test';

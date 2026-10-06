@@ -1,8 +1,8 @@
 import { getAddress, isAddress, keccak256, toBeHex, toUtf8Bytes, zeroPadValue } from 'ethers';
 
-import { AGENT_ID_DOMAIN } from '@agentid/schemas';
+import { CARDCA_DOMAIN } from '@cardca/schemas';
 
-export { AGENT_ID_DOMAIN };
+export { CARDCA_DOMAIN };
 
 export interface UserOperation {
   sender: string;

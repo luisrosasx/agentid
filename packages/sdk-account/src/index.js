@@ -1,6 +1,6 @@
 import { getAddress, isAddress, keccak256, toBeHex, toUtf8Bytes, zeroPadValue } from 'ethers';
-import { AGENT_ID_DOMAIN } from '@agentid/schemas';
-export { AGENT_ID_DOMAIN };
+import { CARDCA_DOMAIN } from '@cardca/schemas';
+export { CARDCA_DOMAIN };
 const DEFAULTS = {
     nonce: '0',
     initCode: '0x',

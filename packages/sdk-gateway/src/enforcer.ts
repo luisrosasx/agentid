@@ -1,5 +1,5 @@
 import { verifyTypedData } from 'ethers';
-import { DOMAIN, ATTESTATION_TYPES } from '@agentid/sdk-verifier';
+import { DOMAIN, ATTESTATION_TYPES } from '@cardca/sdk-verifier';
 
 import { AttestationCache, type CacheEntry } from './cache.js';
 import { ResolverClient, CreditClient, type ResolverEntry, type CreditPolicy } from './clients.js';

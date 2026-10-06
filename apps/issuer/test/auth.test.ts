@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeHmacSignature, sha256Hex } from '@agentid/sdk-auth';
+import { computeHmacSignature, sha256Hex } from '@cardca/sdk-auth';
 
 const SERVICE_KEY = 'issuer-service-key';
 const HMAC_SECRET = 'issuer-hmac-secret';

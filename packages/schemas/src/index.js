@@ -1,8 +1,9 @@
-export const AGENT_ID_DOMAIN = {
-    name: 'AGENT.ID',
+export const CARDCA_DOMAIN = {
+    name: 'CardCA',
     version: '1',
 };
 export const MAX_ATTESTATION_VALIDITY_SECONDS = 24 * 60 * 60;
+export const AGENT_ID_DOMAIN = CARDCA_DOMAIN;
 export const RECEIPT_STRUCT_NAME = 'BilateralReceipt';
 export const ATTESTATION_STRUCT_NAME = 'Attestation';
 export const BilateralReceiptStruct = {

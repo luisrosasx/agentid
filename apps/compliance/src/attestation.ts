@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 export const KYC_DOMAIN = {
-  name: 'AGENT.ID Compliance',
+  name: 'CardCA Compliance',
   version: '1',
 } as const;
 

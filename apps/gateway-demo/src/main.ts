@@ -7,7 +7,7 @@ import { applyRateLimit, applyServiceAuth } from './auth.js';
  *
  * Toda decisión es off-chain (cache de atestaciones + política de crédito
  * cacheada); la cadena nunca toca el hot path. Este demo envuelve el
- * `GatewayEnforcer` de @agentid/sdk-gateway en una API HTTP mínima.
+ * `GatewayEnforcer` de @cardca/sdk-gateway en una API HTTP mínima.
  */
 
 function allowedTargetsFromEnv(): Record<string, string[]> | undefined {

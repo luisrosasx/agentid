@@ -1,7 +1,7 @@
 [package]
 name = "dc_bench"
 type = "bin"
-authors = ["AGENT.ID"]
+authors = ["CardCA"]
 
 [dependencies]
 keccak256 = { path = "/root/lib_keccak" }

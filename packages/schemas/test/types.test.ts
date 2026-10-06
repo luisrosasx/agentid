@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
 import {
-  AGENT_ID_DOMAIN,
+  CARDCA_DOMAIN,
   MAX_ATTESTATION_VALIDITY_SECONDS,
   AttestationValidityError,
   getAttestationTypes,
@@ -20,9 +20,9 @@ const validAtt = {
   expiresAt: now + 3600n,
 };
 
-test('domain has AGENT.ID name and version 1', () => {
-  assert.equal(AGENT_ID_DOMAIN.name, 'AGENT.ID');
-  assert.equal(AGENT_ID_DOMAIN.version, '1');
+test('domain has CardCA name and version 1', () => {
+  assert.equal(CARDCA_DOMAIN.name, 'CardCA');
+  assert.equal(CARDCA_DOMAIN.version, '1');
 });
 
 test('receipt types include all BilateralReceipt fields', () => {

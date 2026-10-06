@@ -9,7 +9,7 @@
 //     (`nargo execute` en Docker debe fallar → rechazo real). 0 mismatches.
 //  4. Exit 0 solo si 10.000/10.000 rechazados y 0 mismatches.
 //
-// Uso: node zk/tests/adversarial.mjs [--sample 100]   (desde agentid/)
+// Uso: node zk/tests/adversarial.mjs [--sample 100]   (desde cardca/)
 
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -20,8 +20,8 @@ const ethers = createRequire(import.meta.url)('../../packages/sdk-receipts/node_
 const { keccak256, getBytes } = ethers;
 
 const SAMPLE = Number(process.argv.find(a => a.startsWith('--sample'))?.split('=')[1] ?? 100);
-const AGENTID = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CIRC = join(AGENTID, 'zk', 'circuits', 'dc_subbatch');
+const CARDCA = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const CIRC = join(CARDCA, 'zk', 'circuits', 'dc_subbatch');
 const NOIR = process.env.NOIR_BIN_DIR ?? '/tmp/noir';
 
 let seedCounter = 0;
@@ -133,7 +133,7 @@ const byClass = {};
 for (const c of cases) (byClass[c.cls] ??= []).push(c);
 let mismatches = 0, realRuns = 0;
 if (SAMPLE > 0) {
-  const keccakLib = join(AGENTID, 'zk', 'lib', 'keccak256');
+  const keccakLib = join(CARDCA, 'zk', 'lib', 'keccak256');
   const hex = (buf) => `["${Array.from(buf).map((x) => '0x' + x.toString(16).padStart(2, '0')).join('", "')}"]`;
   const sample = CLASSES.flatMap((cls) => byClass[cls.name].slice(0, Math.ceil(SAMPLE / CLASSES.length)));
   for (const c of sample) {
@@ -148,10 +148,10 @@ if (SAMPLE > 0) {
     if (existsSync(join(NOIR, 'nargo'))) {
       // toolchain nativa disponible (CI linux / binarios instalados): ejecución directa
       code = execSync(`cd ${JSON.stringify(CIRC)} && ${JSON.stringify(join(NOIR, 'nargo'))} execute >/dev/null 2>&1; echo $?`,
-        { encoding: 'utf8', cwd: AGENTID, shell: 'bash' }).trim();
+        { encoding: 'utf8', cwd: CARDCA, shell: 'bash' }).trim();
     } else {
       const cmd = `MSYS_NO_PATHCONV=1 docker run --rm --platform linux/amd64 -v "$(cygpath -w '${NOIR}'):/noir" -v "$(cygpath -w '${CIRC}'):/circ" -v "$(cygpath -w '${keccakLib}'):/root/lib_keccak" -w /circ debian:12-slim sh -c '/noir/nargo execute >/dev/null 2>&1; echo $?'`;
-      code = execSync(`bash -lc ${JSON.stringify(cmd)}`, { encoding: 'utf8', cwd: AGENTID }).trim();
+      code = execSync(`bash -lc ${JSON.stringify(cmd)}`, { encoding: 'utf8', cwd: CARDCA }).trim();
     }
     realRuns++;
     if (code === '0') { mismatches++; console.error('MISMATCH: el circuito REAL aceptó', c.cls); }
@@ -171,6 +171,6 @@ ${lines}
 
 Metodología: espejo TS con el MISMO orden de restricciones (ventana → unicidad pairwise → pertenencia Merkle keccak → min_k/min_weight), validado con muestra real de ejecuciones del circuito Noir. ${rejected === cases.length && mismatches === 0 ? '✅ 0 pruebas falsas aceptadas.' : '❌ hay fallos.'}
 `;
-writeFileSync(join(AGENTID, 'zk', 'adversarial-report.md'), report);
+writeFileSync(join(CARDCA, 'zk', 'adversarial-report.md'), report);
 console.log(report);
 process.exit(rejected === cases.length && mismatches === 0 ? 0 : 1);

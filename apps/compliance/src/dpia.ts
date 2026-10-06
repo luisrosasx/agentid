@@ -10,7 +10,7 @@ export const DPIA_DATA_CATEGORIES = [
 export const DPIA_LAWFUL_BASIS =
   'contract performance and fraud prevention (GDPR art. 6.1.b / 6.1.f)';
 
-export const DPIA_PROCESSOR = 'AGENT.ID (Nexgen Systems)';
+export const DPIA_PROCESSOR = 'CardCA (Nexgen Systems)';
 
 export interface DpiaReport {
   agentId: string;

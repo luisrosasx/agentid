@@ -99,6 +99,6 @@ test('single-leaf proof and empty leaves', async () => {
   const root = merkleRootFromLeaves([leaf]);
   const proof = merkleProofFromLeaves([leaf], leaf)!;
   assert.equal(verifyMerkleProof(leaf, proof, root), true);
-  assert.equal(merkleRootFromLeaves([]), keccak256(toUtf8Bytes('agentid:empty')));
+  assert.equal(merkleRootFromLeaves([]), keccak256(toUtf8Bytes('cardca:empty')));
 });
 

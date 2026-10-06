@@ -1,6 +1,6 @@
 import { TypedDataEncoder, concat, hexlify, keccak256, toUtf8Bytes, verifyTypedData, } from 'ethers';
-import { AGENT_ID_DOMAIN, getReceiptTypes, } from '@agentid/schemas';
-export { AGENT_ID_DOMAIN };
+import { CARDCA_DOMAIN, getReceiptTypes, } from '@cardca/schemas';
+export { CARDCA_DOMAIN };
 function assertReceiptFormat(receipt) {
     if (typeof receipt.agentId !== 'string' || receipt.agentId.length === 0) {
         throw new Error('agentId must be a non-empty string');
@@ -26,13 +26,13 @@ function assertReceiptFormat(receipt) {
 }
 export async function signReceipt(receipt, signer) {
     assertReceiptFormat(receipt);
-    const signature = await signer.signTypedData({ name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version }, getReceiptTypes(), { ...receipt });
+    const signature = await signer.signTypedData({ name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version }, getReceiptTypes(), { ...receipt });
     const address = await signer.getAddress();
     return { message: { ...receipt }, signature, signer: address };
 }
 export function verifyReceipt(signed, expectedSigner) {
     assertReceiptFormat(signed.message);
-    const recovered = verifyTypedData({ name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version }, getReceiptTypes(), { ...signed.message }, signed.signature);
+    const recovered = verifyTypedData({ name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version }, getReceiptTypes(), { ...signed.message }, signed.signature);
     if (expectedSigner) {
         return recovered.toLowerCase() === expectedSigner.toLowerCase();
     }
@@ -40,14 +40,14 @@ export function verifyReceipt(signed, expectedSigner) {
 }
 export function receiptDigest(receipt) {
     assertReceiptFormat(receipt);
-    return TypedDataEncoder.hash({ name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version }, getReceiptTypes(), { ...receipt });
+    return TypedDataEncoder.hash({ name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version }, getReceiptTypes(), { ...receipt });
 }
 function pairHash(a, b) {
     return keccak256(concat([a, b]));
 }
 export function merkleRoot(receipts) {
     if (receipts.length === 0) {
-        return keccak256(toUtf8Bytes('AGENT.ID:empty-receipt-set'));
+        return keccak256(toUtf8Bytes('CardCA:empty-receipt-set'));
     }
     let level = receipts.map((r) => receiptDigest(r));
     while (level.length > 1) {

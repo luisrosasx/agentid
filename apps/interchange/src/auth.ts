@@ -1,9 +1,9 @@
 // DUPLICADO MÍNIMO de apps/pob-api/src/auth.ts (no existe package compartido;
 // NO se creó uno nuevo). Mantiene el mismo contract: rate-limit por-ruta con
-// configuración de entorno y auth de servicio vía @agentid/sdk-auth.
+// configuración de entorno y auth de servicio vía @cardca/sdk-auth.
 import type { FastifyInstance } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
-import { requireServiceAuth } from '@agentid/sdk-auth';
+import { requireServiceAuth } from '@cardca/sdk-auth';
 
 export const PUBLIC_ROUTES: string[] = ['/healthz', '/metrics'];
 

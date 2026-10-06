@@ -1,5 +1,5 @@
 {
-  "name": "@agentid/sdk-auth",
+  "name": "@cardca/sdk-auth",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",

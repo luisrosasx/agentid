@@ -1,7 +1,10 @@
-export const AGENT_ID_DOMAIN = {
-  name: 'AGENT.ID',
+export const CARDCA_DOMAIN = {
+  name: 'CardCA',
   version: '1',
 } as const;
+
+/** @deprecated Use `CARDCA_DOMAIN`. Kept as alias for backwards compatibility. */
+export const AGENT_ID_DOMAIN = CARDCA_DOMAIN;
 
 export const MAX_ATTESTATION_VALIDITY_SECONDS = 24 * 60 * 60;
 

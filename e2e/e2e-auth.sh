@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AGENT.ID — e2e Fase 6: auth-required (matriz 401, credenciales válidas,
+# CardCA — e2e Fase 6: auth-required (matriz 401, credenciales válidas,
 # anti-replay HMAC, rate limit, y e2e-fase4 completo con auth activa).
 #
 # Formato HMAC (EXACTO de packages/sdk-auth/src/index.ts):
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-AGENTID="$ROOT"
+CARDCA="$ROOT"
 
 CH="${CH:-https://challenges-production.up.railway.app}"
 IS="${IS:-https://issuer-production-9388.up.railway.app}"

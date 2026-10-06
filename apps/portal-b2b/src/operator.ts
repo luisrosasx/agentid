@@ -31,9 +31,9 @@ function isPublic(url: string, extra: string[]): boolean {
 
 export const LOGIN_FORM_HTML = `<!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><title>AGENT.ID — Acceso operador</title></head>
+<head><meta charset="utf-8"><title>CardCA — Acceso operador</title></head>
 <body>
-<h1>AGENT.ID — Acceso operador</h1>
+<h1>CardCA — Acceso operador</h1>
 <form method="post" action="/login">
   <label>Usuario <input name="user" autocomplete="username"></label>
   <label>Contraseña <input name="password" type="password" autocomplete="current-password"></label>

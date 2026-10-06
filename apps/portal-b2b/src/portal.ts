@@ -97,7 +97,7 @@ export function renderHtml(identities: FleetIdentity[]): string {
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>AGENT.ID — Portal B2B</title>
+<title>CardCA — Portal B2B</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; color: #111; }
   h1 { font-size: 1.4rem; }
@@ -108,7 +108,7 @@ export function renderHtml(identities: FleetIdentity[]): string {
 </style>
 </head>
 <body>
-<h1>AGENT.ID — Dashboard B2B</h1>
+<h1>CardCA — Dashboard B2B</h1>
 <p class="muted">Identidades agénticas registradas</p>
 <table>
 <thead><tr><th>agentId</th><th>fuente</th><th>score PoB</th><th>estado</th></tr></thead>
@@ -146,7 +146,7 @@ export function renderLandingHtml(): string {
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>AGENT.ID — Portal B2B</title>
+<title>CardCA — Portal B2B</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; color: #111; }
   h1 { font-size: 1.4rem; }
@@ -157,7 +157,7 @@ export function renderLandingHtml(): string {
 </style>
 </head>
 <body>
-<h1>AGENT.ID — Portal B2B</h1>
+<h1>CardCA — Portal B2B</h1>
 <p class="muted">Identidades agénticas verificables.</p>
 <p><a href="/login">Acceso operador</a></p>
 <h2>Price book</h2>

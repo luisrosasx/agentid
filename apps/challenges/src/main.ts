@@ -92,7 +92,7 @@ function newChallenge(agentId: string): Challenge {
   const id = randomBytes(16).toString('hex');
   const nonce = randomBytes(16).toString('hex');
   const bucket = Math.floor(Date.now() / 60_000);
-  const prompt = sha256(`agentid:challenge:${agentId}:${bucket}`);
+  const prompt = sha256(`cardca:challenge:${agentId}:${bucket}`);
   const expectedAnswerHash = sha256(`${prompt}:${nonce}`);
   return {
     id,

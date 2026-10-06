@@ -1,6 +1,6 @@
 import { Signer } from 'ethers';
-import { AGENT_ID_DOMAIN, type BilateralReceiptMessage } from '@agentid/schemas';
-export { AGENT_ID_DOMAIN };
+import { CARDCA_DOMAIN, type BilateralReceiptMessage } from '@cardca/schemas';
+export { CARDCA_DOMAIN };
 export type { BilateralReceiptMessage };
 export interface SignedBilateralReceipt {
     message: BilateralReceiptMessage;

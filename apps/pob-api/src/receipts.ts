@@ -9,7 +9,7 @@ export interface PobReceipt {
 }
 
 export const POB_DOMAIN = {
-  name: 'AGENT.ID Proof-of-Behavior',
+  name: 'CardCA Proof-of-Behavior',
   version: '1',
 } as const;
 

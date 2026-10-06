@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-const NAME = "AGENT.ID Registry";
+const NAME = "CardCA Registry";
 const VERSION = "1";
 const KYC_TYPEHASH = ethers.id("KYCAttestation(address owner,uint256 agentId,uint256 expiresAt)");
 

@@ -1,4 +1,4 @@
-# Plan de pruebas — replicación de la suite de AGENT.ID
+# Plan de pruebas — replicación de la suite de CardCA
 
 > Fase 9.1 · para el equipo de auditoría externa
 

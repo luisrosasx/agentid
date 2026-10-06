@@ -111,7 +111,7 @@ export interface RequireOperatorOptions {
 }
 
 export const OPERATOR_DOMAIN = {
-  name: 'AGENT.ID',
+  name: 'CardCA',
   version: '1',
 } as const;
 

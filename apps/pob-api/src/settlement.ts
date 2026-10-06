@@ -23,8 +23,8 @@ export interface SettlementRecord {
 /** gateway-emisor bps por tier (1 = mayor volumen): 60 → 25 decreciente con el tier. */
 export const GATEWAY_BPS_BY_TIER = [60, 50, 40, 32, 25] as const;
 
-/** Retención AGENT.ID 0,9% → 0,5% decreciente con volumen ( umbrales en wei, 18 decimales). */
-const AGENTID_VOLUME_STEPS: [bigint, number][] = [
+/** Retención CardCA 0,9% → 0,5% decreciente con volumen ( umbrales en wei, 18 decimales). */
+const CARDCA_VOLUME_STEPS: [bigint, number][] = [
   [100_000n * 10n ** 18n, 90],
   [1_000_000n * 10n ** 18n, 80],
   [10_000_000n * 10n ** 18n, 70],
@@ -33,7 +33,7 @@ const AGENTID_VOLUME_STEPS: [bigint, number][] = [
 ];
 
 export function agentidBpsForVolume(volumeWei: bigint): number {
-  for (const [threshold, bps] of AGENTID_VOLUME_STEPS) {
+  for (const [threshold, bps] of CARDCA_VOLUME_STEPS) {
     if (volumeWei <= threshold) return bps;
   }
   return 50;

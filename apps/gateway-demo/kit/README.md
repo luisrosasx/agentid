@@ -1,6 +1,6 @@
-# AGENT.ID — Kit de integración gateway (<15 min)
+# CardCA — Kit de integración gateway (<15 min)
 
-Integra un gateway externo con AGENT.ID: atestaciones AGENT.CERT, enforcement
+Integra un gateway externo con CardCA: atestaciones AGENT.CERT, enforcement
 de permisos A2A y recibos bilaterales. Todo el flujo de este README se
 verifica automáticamente con el script de onboarding:
 
@@ -14,7 +14,7 @@ código 0 solo si todos los pasos verifican.
 
 ## Prerequisitos
 
-- Node ≥ 22 y pnpm (monorepo `agentid/`)
+- Node ≥ 22 y pnpm (monorepo `cardca/`)
 - Un gateway que pueda llamar HTTP JSON (Fastify/Express/lo que sea)
 
 ## Paso 0 — Dependencias (1 min)
@@ -25,13 +25,13 @@ Desde la raíz del monorepo:
 pnpm install
 ```
 
-Tu gateway consume los SDKs públicos: `@agentid/sdk-auth` (auth de servicio +
-HMAC), `@agentid/sdk-receipts` (recibos bilaterales EIP-712) y, si quieres el
-motor de decisiones embebido, `@agentid/sdk-gateway` (`GatewayEnforcer`).
+Tu gateway consume los SDKs públicos: `@cardca/sdk-auth` (auth de servicio +
+HMAC), `@cardca/sdk-receipts` (recibos bilaterales EIP-712) y, si quieres el
+motor de decisiones embebido, `@cardca/sdk-gateway` (`GatewayEnforcer`).
 
 ## Paso 1 — Obtener la service key (2 min)
 
-El gateway de AGENT.ID autentica llamadas de servicio con `X-Service-Key`.
+El gateway de CardCA autentica llamadas de servicio con `X-Service-Key`.
 En local, el gateway corre con `AUTH_MODE=off` (sin auth) por defecto; en
 producción (`AUTH_MODE=on`) la key debe estar en la lista
 `SERVICE_AUTH_KEYS` (separada por comas) configurada por el operador:
@@ -60,7 +60,7 @@ SHA-256 sobre `METHOD\nPATH\nsha256(body)`, con cabeceras `x-service-id`,
 por nonce. Helper ya listo:
 
 ```ts
-import { computeHmacSignature, sha256Hex } from '@agentid/sdk-auth';
+import { computeHmacSignature, sha256Hex } from '@cardca/sdk-auth';
 
 const body = JSON.stringify(payload);
 const signature = computeHmacSignature('POST', '/enforce', sha256Hex(body), secret);
@@ -79,11 +79,11 @@ Dos caminos equivalentes:
 2. **Embeber el enforcer** (misma decisión, latencia <1 ms en cache):
 
 ```ts
-import { GatewayEnforcer } from '@agentid/sdk-gateway';
+import { GatewayEnforcer } from '@cardca/sdk-gateway';
 
 const enforcer = new GatewayEnforcer({
-  resolverUrl: 'https://resolver.agentid.example',   // sirve atestaciones
-  creditUrl: 'https://credit.agentid.example',       // política de crédito
+  resolverUrl: 'https://api.cardca.dev/resolver',    // sirve atestaciones
+  creditUrl: 'https://api.cardca.dev/credit',        // política de crédito
   allowedTargetsByAgent: { 'agent:mi-agente': ['0x11…'] },
 });
 const decision = await enforcer.enforce('agent:mi-agente', target, amountWei);
@@ -99,8 +99,8 @@ Cada interacción A2A permitida puede dejar un recibo bilateral firmado
 
 ```ts
 import { Wallet } from 'ethers';
-import { signReceipt, verifyReceipt, receiptDigest, merkleRoot } from '@agentid/sdk-receipts';
-import type { BilateralReceiptMessage } from '@agentid/sdk-receipts';
+import { signReceipt, verifyReceipt, receiptDigest, merkleRoot } from '@cardca/sdk-receipts';
+import type { BilateralReceiptMessage } from '@cardca/sdk-receipts';
 
 const receipt: BilateralReceiptMessage = {
   agentId: 'agent:mi-agente',
@@ -142,4 +142,4 @@ Onboarding end-to-end: OK en X.XX s
 
 Si algo falla, revisa `AUTH_MODE`/`SERVICE_AUTH_KEYS` (paso 1) y que el
 resolver sirva atestaciones firmadas con el dominio EIP-712
-`AGENT.ID/1/chainId` correcto.
+`CardCA/1/chainId` correcto.

@@ -1,5 +1,5 @@
 // EP-19-S2 — Generador de testigo de bench: árbol de 1024 recibos, 64 contrapartes activas
-// Uso: node zk/tools/gen-bench-witness.mjs --out <ruta> (desde agentid/)
+// Uso: node zk/tools/gen-bench-witness.mjs --out <ruta> (desde cardca/)
 import { createRequire } from 'node:module';
 import { writeFileSync } from 'node:fs';
 const ethers = createRequire(import.meta.url)('../../packages/sdk-receipts/node_modules/ethers');

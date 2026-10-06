@@ -5,7 +5,7 @@ import {
   merkleRootFromLeaves,
   merkleProofFromLeaves,
   verifyMerkleProof,
-} from '@agentid/sdk-receipts';
+} from '@cardca/sdk-receipts';
 import {
   claimPendingLeaves,
   runBatchCycle,

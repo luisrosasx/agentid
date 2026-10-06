@@ -1,4 +1,4 @@
-# Plantilla RFC — Consorcio AGENT.ID
+# Plantilla RFC — Consorcio CardCA
 
 > Fase 9.4
 

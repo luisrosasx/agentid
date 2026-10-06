@@ -3,14 +3,14 @@ pragma solidity ^0.8.24;
 
 /**
  * @title AgentIdRegistry
- * @notice Soulbound ERC-721 mínimo para identidades agénticas (AGENT.ID).
+ * @notice Soulbound ERC-721 mínimo para identidades agénticas (CardCA).
  *         Los tokens no pueden transferirse. El mint es payable (stake >= 0.01 ETH,
  *         quemable por el owner del token) y solo lo ejecuta un operador autorizado
  *         como Registrar con firma KYC (EIP-712) del compliance signer.
  *         Cada operador (fleet) tiene una cuota máxima de agentes (fleetQuota).
  */
 contract AgentIdRegistry {
-    string public constant NAME = "AGENT.ID Registry";
+    string public constant NAME = "CardCA Registry";
     string public constant VERSION = "1";
     uint256 public constant MIN_STAKE = 0.01 ether;
     uint256 public constant KYC_EXPIRY = 7 days;
@@ -73,7 +73,7 @@ contract AgentIdRegistry {
 
     function ownerOf(uint256 agentId) public view returns (address) {
         address owner = _owners[agentId];
-        if (owner == address(0)) revert("AGENT: nonexistent token");
+        if (owner == address(0)) revert("CARDCA: nonexistent token");
         return owner;
     }
 

@@ -52,7 +52,7 @@ export function resolveOnchainConfig(
   const behaviorProof = deployments?.contracts?.BehaviorProof;
   if (!behaviorProof || !ethers.isAddress(behaviorProof)) return null;
   if (deployments.chainId !== Number(expectedChainId)) return null;
-  const agentIdRaw = env.AGENTID_AGENT_ID;
+  const agentIdRaw = env.CARDCA_AGENT_ID ?? env.AGENTID_AGENT_ID;
   let agentId = 1n;
   if (agentIdRaw !== undefined) {
     try {

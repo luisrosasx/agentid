@@ -1,4 +1,4 @@
-import { type AttestationMessage } from '@agentid/schemas';
+import { type AttestationMessage } from '@cardca/schemas';
 export declare class AttestationFormatError extends Error {
     constructor(message: string);
 }

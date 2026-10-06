@@ -37,7 +37,7 @@ if [[ "$STRATEGY" == "monolithic" ]]; then
   exit 3
 fi
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"   # agentid/
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"   # cardca/
 W="${NOIR_BIN_DIR:-/tmp/noir}"
 [[ -f "$W/nargo" && -f "$W/bb" ]] || { echo "faltan $W/nargo y $W/bb" >&2; exit 2; }
 

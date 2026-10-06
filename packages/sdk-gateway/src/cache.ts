@@ -1,4 +1,4 @@
-import { MAX_ATTESTATION_VALIDITY_SECONDS, type AttestationMessage } from '@agentid/schemas';
+import { MAX_ATTESTATION_VALIDITY_SECONDS, type AttestationMessage } from '@cardca/schemas';
 
 export interface CacheEntry {
   attestation: AttestationMessage;

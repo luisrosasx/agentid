@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { keccak256, toUtf8Bytes } from 'ethers';
 import { Pool } from 'pg';
-import { merkleProofFromLeaves, merkleRootFromLeaves, verifyMerkleProof } from '@agentid/sdk-receipts';
+import { merkleProofFromLeaves, merkleRootFromLeaves, verifyMerkleProof } from '@cardca/sdk-receipts';
 import { registerMetrics } from './metrics.js';
 import { applyRateLimit, applyServiceAuth } from './auth.js';
 import { anchorOnChain, resolveOnchainConfig, loadDeployments, type OnchainConfig } from './onchain.js';
@@ -37,7 +37,7 @@ export function resolveAnchorMode(env: NodeJS.ProcessEnv): 'sim' | 'real' {
 }
 
 function merkleRoot(leaves: string[]): string {
-  if (leaves.length === 0) return keccak256(toUtf8Bytes('agentid:empty'));
+  if (leaves.length === 0) return keccak256(toUtf8Bytes('cardca:empty'));
   return merkleRootFromLeaves(leaves);
 }
 
@@ -154,7 +154,7 @@ export async function buildApp(opts: BuildAppOptions = {}): Promise<BuiltApp> {
       }
     } else {
       txHash = keccak256(
-        toUtf8Bytes(`agentid:sim:${root}:${attestations.length}:${anchoredAt.getTime()}`),
+        toUtf8Bytes(`cardca:sim:${root}:${attestations.length}:${anchoredAt.getTime()}`),
       );
     }
     let batchId: number | null = null;

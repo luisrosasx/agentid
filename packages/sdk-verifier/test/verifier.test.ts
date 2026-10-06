@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import { Wallet } from 'ethers';
 
-import { AttestationValidityError } from '@agentid/schemas';
+import { AttestationValidityError } from '@cardca/schemas';
 import { ATTESTATION_TYPES, AttestationFormatError, DOMAIN, verifyAttestation } from '../src/index.js';
 
 const issuer = Wallet.createRandom();
@@ -74,7 +74,7 @@ test('signature from a different wallet fails', async () => {
 test('signature over a different chainId fails (domain mismatch)', async () => {
   const att = attestation();
   const sig = await issuer.signTypedData(
-    { name: 'AGENT.ID', version: '1', chainId: 1 },
+    { name: 'CardCA', version: '1', chainId: 1 },
     ATTESTATION_TYPES,
     att as never,
   );

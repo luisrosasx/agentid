@@ -44,7 +44,7 @@ test('resolves full config with defaults', () => {
 
 test('honours rpc url and agent id overrides', () => {
   const cfg = resolveOnchainConfig(
-    { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), BASE_SEPOLIA_RPC_URL: 'http://localhost:8545', AGENTID_AGENT_ID: '42' },
+    { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), BASE_SEPOLIA_RPC_URL: 'http://localhost:8545', CARDCA_AGENT_ID: '42' },
     DEPLOYMENTS,
   );
   assert.ok(cfg);
@@ -55,11 +55,27 @@ test('honours rpc url and agent id overrides', () => {
 test('rejects malformed agent id', () => {
   assert.equal(
     resolveOnchainConfig(
-      { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), AGENTID_AGENT_ID: 'zz' },
+      { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), CARDCA_AGENT_ID: 'zz' },
       DEPLOYMENTS,
     ),
     null,
   );
+});
+
+test('legacy AGENTID_AGENT_ID is honoured as fallback', () => {
+  const cfg = resolveOnchainConfig(
+    { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), AGENTID_AGENT_ID: '42' },
+    DEPLOYMENTS,
+  );
+  assert.ok(cfg);
+  assert.equal(cfg.agentId, 42n);
+  // CARDCA_AGENT_ID tiene prioridad sobre el fallback
+  const both = resolveOnchainConfig(
+    { DEPLOYER_PRIVATE_KEY: '0x' + 'aa'.repeat(32), CARDCA_AGENT_ID: '7', AGENTID_AGENT_ID: '42' },
+    DEPLOYMENTS,
+  );
+  assert.ok(both);
+  assert.equal(both.agentId, 7n);
 });
 
 test('loadDeployments tolerates missing/corrupt files', () => {

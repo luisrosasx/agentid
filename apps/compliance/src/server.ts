@@ -5,7 +5,7 @@ import { dpiaReport } from './dpia.js';
 import { MemoryTables, performErasure } from './erase.js';
 import { registerMetrics } from './metrics.js';
 import { applyRateLimit, applyServiceAuth, RATE_LIMIT_KYC_MAX } from './auth.js';
-import { InMemoryNonceStore, requireHmac, requireOperator } from '@agentid/sdk-auth';
+import { InMemoryNonceStore, requireHmac, requireOperator } from '@cardca/sdk-auth';
 
 const SERVICE = 'compliance';
 

@@ -1,8 +1,9 @@
-export declare const AGENT_ID_DOMAIN: {
-    readonly name: "AGENT.ID";
+export declare const CARDCA_DOMAIN: {
+    readonly name: "CardCA";
     readonly version: "1";
 };
 export declare const MAX_ATTESTATION_VALIDITY_SECONDS: number;
+export declare const AGENT_ID_DOMAIN: typeof CARDCA_DOMAIN;
 export declare const RECEIPT_STRUCT_NAME: "BilateralReceipt";
 export declare const ATTESTATION_STRUCT_NAME: "Attestation";
 export type Eip712TypeDefinition = {

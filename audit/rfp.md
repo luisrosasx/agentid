@@ -1,10 +1,10 @@
-# RFP — Auditoría externa de contratos AGENT.ID (spec v1)
+# RFP — Auditoría externa de contratos CardCA (spec v1)
 
 > Fase 9.2 (parte agéntica) · para selección/contratación (gate humano)
 
 ## Resumen del proyecto
 
-AGENT.ID es la capa de confianza para agentes de IA (identidad soulbound ERC-721 + atestaciones de capacidades + credencial conductual + cuenta con límites). Los 4 contratos base están implementados y testeados (24 tests Hardhat); el deploy a Base Sepolia está automatizado (gated a fondeo). Contratos ZK-verificadores (UltraHonk) ya generados y probados on-chain en red local.
+CardCA es la capa de confianza para agentes de IA (identidad soulbound ERC-721 + atestaciones de capacidades + credencial conductual + cuenta con límites). Los 4 contratos base están implementados y testeados (24 tests Hardhat); el deploy a Base Sepolia está automatizado (gated a fondeo). Contratos ZK-verificadores (UltraHonk) ya generados y probados on-chain en red local.
 
 ## Alcance
 

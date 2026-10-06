@@ -9,12 +9,12 @@ import {
 } from 'ethers';
 
 import {
-  AGENT_ID_DOMAIN,
+  CARDCA_DOMAIN,
   getReceiptTypes,
   type BilateralReceiptMessage,
-} from '@agentid/schemas';
+} from '@cardca/schemas';
 
-export { AGENT_ID_DOMAIN };
+export { CARDCA_DOMAIN };
 
 export type { BilateralReceiptMessage };
 
@@ -54,7 +54,7 @@ export async function signReceipt(
 ): Promise<SignedBilateralReceipt> {
   assertReceiptFormat(receipt);
   const signature = await signer.signTypedData(
-    { name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version },
+    { name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version },
     getReceiptTypes(),
     { ...receipt },
   );
@@ -68,7 +68,7 @@ export function verifyReceipt(
 ): boolean {
   assertReceiptFormat(signed.message);
   const recovered = verifyTypedData(
-    { name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version },
+    { name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version },
     getReceiptTypes(),
     { ...signed.message },
     signed.signature,
@@ -82,7 +82,7 @@ export function verifyReceipt(
 export function receiptDigest(receipt: BilateralReceiptMessage): string {
   assertReceiptFormat(receipt);
   return TypedDataEncoder.hash(
-    { name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version },
+    { name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version },
     getReceiptTypes(),
     { ...receipt },
   );
@@ -112,7 +112,7 @@ function buildLevels(leaves: string[]): string[][] {
 }
 
 export function merkleRootFromLeaves(leaves: string[]): string {
-  if (leaves.length === 0) return keccak256(toUtf8Bytes('agentid:empty'));
+  if (leaves.length === 0) return keccak256(toUtf8Bytes('cardca:empty'));
   const levels = buildLevels(leaves);
   return hexlify(levels[levels.length - 1][0]);
 }
@@ -154,7 +154,7 @@ export function verifyMerkleProof(leafHash: string, proof: MerkleProofStep[], ro
 
 export function merkleRoot(receipts: BilateralReceiptMessage[]): string {
   if (receipts.length === 0) {
-    return keccak256(toUtf8Bytes('AGENT.ID:empty-receipt-set'));
+    return keccak256(toUtf8Bytes('CardCA:empty-receipt-set'));
   }
   let level: string[] = receipts.map((r) => receiptDigest(r));
   while (level.length > 1) {

@@ -2,7 +2,7 @@ import { network, ethers } from "hardhat";
 import { writeFileSync, mkdirSync } from "node:fs";
 
 /**
- * Deploy AGENT.ID contracts to a real network (e.g. base-sepolia).
+ * Deploy CardCA contracts to a real network (e.g. base-sepolia).
  *
  * Requiere:
  *  - DEPLOYER_PRIVATE_KEY en el entorno (cuenta con fondos en la red destino)

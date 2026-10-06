@@ -4,7 +4,7 @@ export { GatewayEnforcer, percentile } from './enforcer.js';
 export { emptyMetrics } from './metrics.js';
 export type {
   AttestationMessage,
-} from '@agentid/schemas';
+} from '@cardca/schemas';
 export type {
   CacheEntry,
   CacheStats,

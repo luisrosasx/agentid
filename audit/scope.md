@@ -1,4 +1,4 @@
-# Alcance de la auditoría — AGENT.ID (spec v1)
+# Alcance de la auditoría — CardCA (spec v1)
 
 > Generado agénticamente (Fase 9.1) · commit base: `3dc1093` (agentid) · 2026-10-04
 

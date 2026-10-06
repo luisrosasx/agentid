@@ -6,7 +6,7 @@
 // día (batchRootForDay, pares ordenados estilo OpenZeppelin) y cualquier gateway
 // reclama su parte presentando proof + Settlement; el contrato re-deriva los
 // montos con la MISMA tabla (GATEWAY_BPS_BY_TIER y retención por volumen) y
-// revierte si no coinciden. La retención AGENT.ID se acredita como crédito de
+// revierte si no coinciden. La retención CardCA se acredita como crédito de
 // libro (agentidCredit), pendiente del token de crédito (EP-23).
 //
 // Upgradeable UUPS. Las funciones de configuración usan un patrón two-step con

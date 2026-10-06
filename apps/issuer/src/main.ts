@@ -1,11 +1,11 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { Wallet, TypedDataEncoder } from 'ethers';
 import { Pool } from 'pg';
-import { InMemoryNonceStore, requireHmac } from '@agentid/sdk-auth';
+import { InMemoryNonceStore, requireHmac } from '@cardca/sdk-auth';
 import { registerMetrics } from './metrics.js';
 import { applyRateLimit, applyServiceAuth } from './auth.js';
 
-const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
+const DOMAIN = { name: 'CardCA', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const TYPES = {
   Attestation: [
     { name: 'agentId', type: 'string' },

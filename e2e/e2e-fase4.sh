@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AGENT.ID — e2e Fase 4 (Cuenta Agentil + gateway-demo): flujo completo EN VIVO
+# CardCA — e2e Fase 4 (Cuenta Agentil + gateway-demo): flujo completo EN VIVO
 # contra Railway, A TRAVÉS del gateway-demo.
 #
 # Contratos reales verificados en el código:
@@ -32,7 +32,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-AGENTID="$ROOT"
+CARDCA="$ROOT"
 
 CH="${CH:-https://challenges-production.up.railway.app}"
 IS="${IS:-https://issuer-production-9388.up.railway.app}"
@@ -121,15 +121,15 @@ done
 
 # --- Paso 1: KYC firmado (compliance) -----------------------------------------
 step 1 "KYC firmado — compliance /kyc-attestation (EIP-712 operador + HMAC)"
-# Firma EIP-712 del operador ANTES de llamar: dominio {name:'AGENT.ID',version:'1'},
+# Firma EIP-712 del operador ANTES de llamar: dominio {name:'CardCA',version:'1'},
 # tipo OperatorAttestation {operatorAddress, purpose:'kyc-attestation', nonce,
 # timestamp uint64 en ms} (contrato EXACTO de packages/sdk-auth).
-if OP_LINE="$(cd "$AGENTID/apps/compliance" && node --input-type=module -e "
+if OP_LINE="$(cd "$CARDCA/apps/compliance" && node --input-type=module -e "
   const { ethers } = await import('ethers');
   const wallet = new ethers.Wallet(process.env.E2E_OPERATOR_KEY);
   const nonce = 'e2e-kyc-' + crypto.randomUUID();
   const timestamp = String(Date.now());
-  const domain = { name: 'AGENT.ID', version: '1' };
+  const domain = { name: 'CardCA', version: '1' };
   const types = { OperatorAttestation: [
     { name: 'operatorAddress', type: 'address' },
     { name: 'purpose', type: 'string' },
@@ -196,10 +196,10 @@ fi
 # --- Paso 5: recibo bilateral firmado (pob-api, POB_KEY) ------------------------
 step 5 "Recibo bilateral firmado — pob-api /receipt (firma con POB_KEY)"
 if [[ -n "${E2E_SIGNER_KEY:-${POB_KEY:-}}" ]]; then
-  RECEIPT_SIG="$(cd "$AGENTID/apps/pob-api" && node --input-type=module -e "
+  RECEIPT_SIG="$(cd "$CARDCA/apps/pob-api" && node --input-type=module -e "
     const { ethers } = await import('ethers');
     const wallet = new ethers.Wallet(process.env.E2E_SIGNER_KEY ?? process.env.POB_KEY);
-    const domain = { name: 'AGENT.ID Proof-of-Behavior', version: '1' };
+    const domain = { name: 'CardCA Proof-of-Behavior', version: '1' };
     const types = { Receipt: [
       { name: 'agentId', type: 'string' },
       { name: 'counterparty', type: 'address' },

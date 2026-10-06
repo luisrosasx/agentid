@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# e2e/railway-smoke.sh — Smoke test e2e de los servicios AGENT.ID desplegados en Railway.
+# e2e/railway-smoke.sh — Smoke test e2e de los servicios CardCA desplegados en Railway.
 #
 # Variables de entorno requeridas (URLs base sin slash final):
 #   RAILWAY_CHALLENGES_URL  RAILWAY_ISSUER_URL   RAILWAY_RESOLVER_URL

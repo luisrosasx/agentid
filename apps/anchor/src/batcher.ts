@@ -1,5 +1,5 @@
 import { keccak256, toUtf8Bytes } from 'ethers';
-import { merkleRootFromLeaves } from '@agentid/sdk-receipts';
+import { merkleRootFromLeaves } from '@cardca/sdk-receipts';
 import { resolveOnchainConfig, anchorOnChain, type OnchainConfig } from './onchain.js';
 
 export interface BatchDb {
@@ -218,7 +218,7 @@ export async function runBatchCycle(
 export function simAnchorFn(seed: string = 'batch'): AnchorFn {
   return (root) =>
     Promise.resolve({
-      txHash: keccak256(toUtf8Bytes(`agentid:sim-batch:${seed}:${root}`)),
+      txHash: keccak256(toUtf8Bytes(`cardca:sim-batch:${seed}:${root}`)),
       blockNumber: null,
     });
 }

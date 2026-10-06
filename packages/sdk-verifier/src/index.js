@@ -1,5 +1,5 @@
 import { verifyTypedData, getAddress, isAddress } from 'ethers';
-import { AGENT_ID_DOMAIN, AttestationValidityError, MAX_ATTESTATION_VALIDITY_SECONDS, getAttestationTypes, } from '@agentid/schemas';
+import { CARDCA_DOMAIN, AttestationValidityError, MAX_ATTESTATION_VALIDITY_SECONDS, getAttestationTypes, } from '@cardca/schemas';
 export class AttestationFormatError extends Error {
     constructor(message) {
         super(message);
@@ -44,7 +44,7 @@ export function verifyAttestation(att, issuerAddress, signature, now = BigInt(Ma
     if (recovered.toLowerCase() !== issuer.toLowerCase()) {
         throw new AttestationFormatError('signature does not match issuerAddress');
     }
-    const ok = verifyTypedData({ name: AGENT_ID_DOMAIN.name, version: AGENT_ID_DOMAIN.version }, getAttestationTypes(), { ...att }, signature);
+    const ok = verifyTypedData({ name: CARDCA_DOMAIN.name, version: CARDCA_DOMAIN.version }, getAttestationTypes(), { ...att }, signature);
     if (ok.toLowerCase() !== issuer.toLowerCase()) {
         throw new AttestationFormatError('signature verification failed');
     }

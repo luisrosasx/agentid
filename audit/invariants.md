@@ -1,4 +1,4 @@
-# Invariantes formales — AGENT.ID (contratos v1)
+# Invariantes formales — CardCA (contratos v1)
 
 > Fase 9.1 · invariantes que el auditor debe verificar formalmente (fuzzing/invariant tests de nuevo desarrollo + los implícitos en la suite actual)
 

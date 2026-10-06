@@ -1,4 +1,4 @@
-# Modelo de amenazas — AGENT.ID (contratos v1)
+# Modelo de amenazas — CardCA (contratos v1)
 
 > Fase 9.1 · generado agénticamente a partir de la suite real (24 tests Hardhat) y los hallazgos internos verificados (analysis/fase-a/A4-DEUDA-TECNICA.md)
 

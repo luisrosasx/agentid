@@ -8,7 +8,7 @@ import {
 
 // Dominio y types idénticos a los del issuer/resolver en producción
 // (apps/issuer/src/main.ts) — debe coincidir bit a bit con quien firma.
-const DOMAIN = { name: 'AGENT.ID', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
+const DOMAIN = { name: 'CardCA', version: '1', chainId: Number(process.env.CHAIN_ID ?? 31337) };
 const ATTESTATION_TYPES = {
   Attestation: [
     { name: 'agentId', type: 'string' },

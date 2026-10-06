@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# agentid/e2e/verify-anchor.sh — Verificación independiente del anclaje on-chain (Fase 7.6)
+# cardca/e2e/verify-anchor.sh — Verificación independiente del anclaje on-chain (Fase 7.6)
 #
 # Dado ANCHOR_URL y un RPC de Base Sepolia:
 #   (a) lee GET /anchors/latest del servicio anchor,
@@ -11,7 +11,7 @@
 #   (d) imprime "root on-chain == root local; proof válida para leaf <hash>" y exit 0.
 #
 # Uso:
-#   ANCHOR_URL=http://127.0.0.1:3000 ./agentid/e2e/verify-anchor.sh
+#   ANCHOR_URL=http://127.0.0.1:3000 ./cardca/e2e/verify-anchor.sh
 #
 # Env:
 #   ANCHOR_URL        (requerido) URL base del servicio anchor
@@ -20,7 +20,7 @@
 #   ANCHOR_AGENT_ID   (opcional) filtra el evento por agentId
 #
 # Verificación local (e2e, red hardhat):
-#   cd agentid/contracts && npx hardhat node &           # nodo local :8545
+#   cd cardca/contracts && npx hardhat node &           # nodo local :8545
 #   DEPLOYER_PRIVATE_KEY=<key-0-de-hardhat> npx hardhat run scripts/deploy.ts --network localhost
 #   # anchor en modo real contra el nodo local:
 #   DATABASE_URL=... ANCHOR_MODE=real BASE_SEPOLIA_RPC_URL=http://127.0.0.1:8545 \
@@ -43,13 +43,13 @@ DEPLOYMENTS_JSON="${DEPLOYMENTS_JSON:-${REPO_ROOT}/contracts/deployments.json}"
 BASE_RPC_URL="${BASE_RPC_URL:-https://sepolia.base.org}"
 
 if [[ ! -f "${DEPLOYMENTS_JSON}" ]]; then
-  echo "ERROR: no existe ${DEPLOYMENTS_JSON} (despliega con: cd agentid/contracts && npx hardhat run scripts/deploy.ts --network baseSepolia)" >&2
+  echo "ERROR: no existe ${DEPLOYMENTS_JSON} (despliega con: cd cardca/contracts && npx hardhat run scripts/deploy.ts --network baseSepolia)" >&2
   exit 1
 fi
 
 ABI_JSON="${REPO_ROOT}/contracts/artifacts/contracts/BehaviorProof.sol/BehaviorProof.json"
 if [[ ! -f "${ABI_JSON}" ]]; then
-  echo "ERROR: no existe el ABI compilado ${ABI_JSON} (ejecuta: cd agentid/contracts && npx hardhat compile)" >&2
+  echo "ERROR: no existe el ABI compilado ${ABI_JSON} (ejecuta: cd cardca/contracts && npx hardhat compile)" >&2
   exit 1
 fi
 
@@ -63,7 +63,7 @@ import { join } from 'node:path';
 const repoRoot = process.env.REPO_ROOT;
 const require2 = createRequire(join(repoRoot, 'apps/anchor/node_modules/x.js'));
 const { ethers } = require2('ethers');
-const receipts = require2('@agentid/sdk-receipts');
+const receipts = require2('@cardca/sdk-receipts');
 
 const anchorUrl = process.env.ANCHOR_URL.replace(/\/+$/, '');
 const rpcUrl = process.env.BASE_RPC_URL;

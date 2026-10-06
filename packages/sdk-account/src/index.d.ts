@@ -1,5 +1,5 @@
-import { AGENT_ID_DOMAIN } from '@agentid/schemas';
-export { AGENT_ID_DOMAIN };
+import { CARDCA_DOMAIN } from '@cardca/schemas';
+export { CARDCA_DOMAIN };
 export interface UserOperation {
     sender: string;
     nonce: string;

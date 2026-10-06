@@ -1,5 +1,5 @@
 {
-  "name": "@agentid/sdk-gateway",
+  "name": "@cardca/sdk-gateway",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
@@ -9,8 +9,8 @@
     "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@agentid/schemas": "workspace:*",
-    "@agentid/sdk-verifier": "workspace:*",
+    "@cardca/schemas": "workspace:*",
+    "@cardca/sdk-verifier": "workspace:*",
     "ethers": "^6.13.0"
   },
   "devDependencies": {

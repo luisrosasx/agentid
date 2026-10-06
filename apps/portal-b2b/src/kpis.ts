@@ -111,7 +111,7 @@ export function renderKpisHtml(d: KpiDashboard): string {
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>AGENT.ID — KPIs</title>
+<title>CardCA — KPIs</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; color: #111; }
   h1 { font-size: 1.4rem; }
@@ -122,7 +122,7 @@ export function renderKpisHtml(d: KpiDashboard): string {
 </style>
 </head>
 <body>
-<h1>AGENT.ID — Dashboard de KPIs</h1>
+<h1>CardCA — Dashboard de KPIs</h1>
 <p class="muted">Dashboard único de adopción (blueprint 06 §6) y señales del día 90 (blueprint 04). Los KPIs sin instrumentación aún se muestran como —, nunca se inventan cifras.</p>
 <table>
 <thead><tr><th>KPI</th><th>Valor</th><th>Unidad</th><th>Objetivo</th><th>Fuente</th></tr></thead>

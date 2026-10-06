@@ -10,7 +10,7 @@ Congelar para la spec v1: (a) el dominio y tipos EIP-712 del recibo bilateral,
 ## Formato de recibo (EIP-712)
 
 ```
-Domain:  name "AGENT.ID Proof-of-Behavior", version "1", chainId <red>, verifyingContract <BehaviorProof address>
+Domain:  name "CardCA Proof-of-Behavior", version "1", chainId <red>, verifyingContract <BehaviorProof address>
 Types:   Receipt(agentId, counterparty (address), outcome, nonce, issuedAt, counterpartyStakeRoot)
 Signer:  la clave POB del emisor (verificable en BehaviorProof/metrics lastReceiptSigner)
 ```
@@ -36,7 +36,7 @@ Signer:  la clave POB del emisor (verificable en BehaviorProof/metrics lastRecei
 ## Impacto en compatibilidad
 
 - Cambiar cualquier campo EIP-712 = v2 (semver del domain).
-- Los recibos emitidos con v1 permanecen verificables (chainId + verifyingContract fijos).
+- Los recibos emitidos con v1 permanecen verificables (chainId + verifyingContract fijos). Nota: el renombrado del `name` del dominio EIP-712 de "AGENT.ID Proof-of-Behavior" a "CardCA Proof-of-Behavior" como parte del rebranding a CardCA (2026-10-06) implica un bump de versión del domain; los recibos ya emitidos siguen verificándose con el dominio original.
 
 ## Estado
 
